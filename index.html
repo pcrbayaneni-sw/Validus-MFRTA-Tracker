@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Validus MF RTA Sandbox Tracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#F4F6FA;color:#1a1a1a;font-size:13px}
+input,select,button{font-family:inherit;font-size:13px}
+button{cursor:pointer}
+input:focus,select:focus{outline:2px solid #185FA5;outline-offset:1px}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:#C0C8D8;border-radius:3px}
+#login-screen{min-height:100vh;background:#0C2554;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
+.login-brand{text-align:center;margin-bottom:1.75rem}
+.lb-sub{font-size:11px;font-weight:700;letter-spacing:0.18em;color:#7BA7D9;text-transform:uppercase;margin-bottom:5px}
+.lb-title{font-size:26px;font-weight:800;color:#fff;line-height:1.2}
+.lb-dates{font-size:12px;color:#7BA7D9;margin-top:6px}
+.login-card{background:#fff;border-radius:14px;padding:1.75rem 2rem;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.login-card h2{font-size:18px;font-weight:800;color:#0C2554;margin-bottom:3px}
+.login-card p{font-size:12px;color:#888;margin-bottom:20px}
+.form-label{display:block;font-size:10px;font-weight:700;color:#555;margin-bottom:5px;letter-spacing:0.06em;text-transform:uppercase}
+.form-input{width:100%;padding:9px 12px;border:1.5px solid #D3D1C7;border-radius:7px;font-size:13px;color:#1a1a1a;background:#FAFAFA;outline:none}
+.form-input.error{border-color:#E24B4A}
+.error-msg{font-size:11px;color:#A32D2D;margin-top:7px;line-height:1.4;display:none}
+.btn-login{margin-top:16px;width:100%;padding:10px;background:#0C2554;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700}
+.btn-login:disabled{background:#7BA7D9;cursor:not-allowed}
+.login-footer{margin-top:1.25rem;font-size:11px;color:#4A6FA5;text-align:center}
+#app-screen{display:none;min-height:100vh;background:#F4F6FA}
+.topbar{background:#0C2554;height:50px;padding:0 20px;display:flex;align-items:center;justify-content:space-between}
+.topbar-left .sub{color:#7BA7D9;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase}
+.topbar-left .title{color:#fff;font-size:13px;font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-name{font-size:12px;color:#C8D9EE;font-weight:500}
+.sync-pill{font-size:10px;padding:2px 9px;border-radius:20px;font-weight:600;transition:all .3s}
+.sync-ok{background:#0F3D2A;color:#4ADE80}
+.sync-saving{background:#3D2E0A;color:#FCD34D}
+.sync-error{background:#3D0A0A;color:#FCA5A5}
+.sync-local{background:#1A2E4A;color:#7BA7D9}
+.btn-signout{font-size:11px;color:#7BA7D9;background:none;border:1px solid #2A4A7A;padding:3px 9px;border-radius:5px}
+.tabbar{background:#fff;border-bottom:1px solid #E8EDF5;padding:0 20px;display:flex}
+.tab-btn{padding:11px 16px;font-size:12px;background:none;border:none;border-bottom:2.5px solid transparent;color:#888;margin-bottom:-1px}
+.tab-btn.active{color:#0C2554;font-weight:700;border-bottom-color:#0C2554}
+.content{max-width:820px;margin:0 auto;padding:18px 16px}
+.avatar{border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.metric-card{background:#F7F9FC;border-radius:8px;padding:10px 12px;border:1px solid #E8EDF5}
+.metric-label{font-size:10px;color:#888;margin-bottom:3px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase}
+.metric-val{font-size:20px;font-weight:800}
+.progress-bar{height:5px;background:#E8EDF5;border-radius:3px;overflow:hidden;margin-bottom:14px}
+.progress-fill{height:100%;background:#185FA5;border-radius:3px;transition:width .4s}
+.filter-bar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.chip{font-size:11px;padding:3px 11px;border-radius:20px;border:1px solid #D3D1C7;background:#fff;color:#555}
+.chip.active{border:1.5px solid #0C2554;background:#0C2554;color:#fff;font-weight:700}
+.chip-select{font-size:11px;padding:3px 8px;border-radius:20px;border:1px solid #D3D1C7;background:#fff;color:#555}
+.acc-day{border:1px solid #E0E6F0;border-radius:10px;margin-bottom:8px;overflow:hidden;background:#fff}
+.acc-day-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none;transition:background .15s}
+.acc-day-header:hover{background:#F7F9FC}
+.acc-day-header.open{background:#F0F5FF;border-bottom:1px solid #E0E6F0}
+.acc-day-left{display:flex;align-items:center;gap:10px}
+.acc-day-tag{font-size:10px;font-weight:700;color:#185FA5;background:#EBF3FD;padding:2px 8px;border-radius:20px;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap}
+.acc-day-date{font-size:11px;color:#888}
+.acc-day-phase{font-size:12px;font-weight:600;color:#1a1a1a}
+.acc-day-right{display:flex;align-items:center;gap:8px}
+.acc-day-pills{display:flex;gap:4px}
+.mini-pill{font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600}
+.pill-done{background:#EDFBF3;color:#0F6E56}
+.pill-prog{background:#FFFBEC;color:#854F0B}
+.pill-block{background:#FFF0F0;color:#A32D2D}
+.pill-ns{background:#F6F6F6;color:#888}
+.acc-chevron{font-size:14px;color:#888;transition:transform .2s;line-height:1}
+.acc-chevron.open{transform:rotate(180deg)}
+.acc-day-body{display:none;padding:0 14px 10px}
+.acc-day-body.open{display:block}
+.acc-task{border:1px solid #F0F0F0;border-radius:7px;margin-top:7px;overflow:hidden;background:#FAFAFA}
+.acc-task.mine{background:#F5F8FF;border-color:#D0E0F8}
+.acc-task-header{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;cursor:pointer;user-select:none;gap:8px}
+.acc-task-header:hover{background:rgba(0,0,0,.02)}
+.acc-task-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.acc-task-owner{font-size:12px;font-weight:700;color:#1a1a1a;white-space:nowrap}
+.acc-task-preview{font-size:11px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
+.acc-task-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.mine-tag{font-size:9px;font-weight:700;color:#185FA5;background:#EBF3FD;padding:1px 6px;border-radius:10px;letter-spacing:0.04em}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;white-space:nowrap}
+.acc-task-chevron{font-size:12px;color:#aaa;transition:transform .2s;line-height:1}
+.acc-task-chevron.open{transform:rotate(180deg)}
+.acc-task-body{display:none;padding:8px 10px 10px;border-top:1px solid #ECEEF2}
+.acc-task-body.open{display:block}
+.task-full-text{font-size:12px;color:#444;line-height:1.6;margin-bottom:8px}
+.task-actions{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.status-btn{font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid #D3D1C7;background:#fff;color:#555}
+.task-note-input{font-size:11px;padding:4px 8px;border:1px solid #D3D1C7;border-radius:6px;outline:none;flex-grow:1;min-width:100px;color:#333;background:#fff}
+.task-note-display{font-size:11px;color:#888;font-style:italic;margin-top:4px}
+.report-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.report-btns{display:flex;gap:6px;align-items:center}
+.btn-copy{font-size:11px;padding:6px 12px;border:1px solid #D3D1C7;border-radius:7px;background:#fff;color:#555}
+.btn-download{font-size:11px;padding:6px 12px;border:1px solid #185FA5;border-radius:7px;background:#0C2554;color:#fff;font-weight:700}
+.person-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #F0F0F0}
+.mini-bar{height:4px;background:#E8EDF5;border-radius:3px;overflow:hidden;margin-top:3px}
+.mini-fill{height:100%;border-radius:3px}
+.blocked-item{background:#FFF0F0;border:1px solid #F7C1C1;border-radius:7px;padding:8px 12px;margin-bottom:6px}
+.summary-box{background:#F0F5FF;border:1px solid #C5D8F5;border-radius:9px;padding:12px 14px;font-size:12px;line-height:1.65;margin-top:14px}
+.section-label{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;margin-top:16px}
+.alert-banner{background:#FFFBEC;border:1px solid #FAC775;border-radius:9px;padding:10px 14px;margin-bottom:14px;display:flex;gap:10px}
+.alert-card{background:#fff;border:1px solid #E8EDF5;border-radius:10px;padding:14px;margin-bottom:14px}
+.form-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.form-group{flex:1;min-width:130px}
+.form-group label{font-size:10px;font-weight:700;color:#888;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em}
+.form-group select{width:100%;padding:7px 9px;border-radius:7px;border:1px solid #D3D1C7}
+.btn-preview{padding:8px 18px;background:#0C2554;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700}
+.preview-card{background:#fff;border:1.5px solid #D3D1C7;border-radius:10px;padding:16px}
+.preview-msg-box{background:#F7F9FC;border-radius:7px;padding:12px 14px;margin-bottom:14px;line-height:1.7;font-size:12px;color:#333}
+.update-row{padding:8px 0;border-bottom:1px solid #F0F0F0}
+.update-controls{display:flex;gap:7px;flex-wrap:wrap;margin-top:5px}
+.update-controls select{font-size:11px;padding:4px 7px;border-radius:6px;border:1px solid #D3D1C7}
+.update-controls input{flex:1;min-width:160px;font-size:11px;padding:4px 8px;border:1px solid #D3D1C7;border-radius:6px;outline:none}
+.btn-save{margin-top:12px;padding:8px 18px;background:#0C2554;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700}
+.milestone-card{background:#fff;border:1px solid #E8EDF5;border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.empty-msg{text-align:center;color:#aaa;font-size:12px;padding:1rem 0}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-brand">
+    <div class="lb-sub">Validus Fintech Services</div>
+    <div class="lb-title">MF RTA Sandbox Tracker</div>
+    <div class="lb-dates">Kick off 17 Jun · Handover 7 Jul · 15 working days</div>
+  </div>
+  <div class="login-card">
+    <h2>Sign in</h2>
+    <p>Enter your Validus email to continue</p>
+    <label class="form-label" for="email-input">Email address</label>
+    <input class="form-input" id="email-input" type="email" placeholder="you@validusfintech.com" autocomplete="email"/>
+    <div class="error-msg" id="login-error">Email not recognised. Please use your Validus Fintech email address.</div>
+    <button class="btn-login" id="login-btn" type="button">Sign in →</button>
+  </div>
+  <div class="login-footer">Access is restricted to authorised Validus team members.</div>
+</div>
+
+<div id="app-screen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="sub">Validus Fintech · </span>
+      <span class="title">MF RTA Sandbox Tracker</span>
+    </div>
+    <div class="topbar-right">
+      <span class="sync-pill sync-local" id="sync-status">● Local</span>
+      <div id="topbar-avatar" class="avatar" style="width:26px;height:26px;font-size:9px"></div>
+      <span class="topbar-name" id="topbar-name"></span>
+      <button class="btn-signout" id="signout-btn">Sign out</button>
+    </div>
+  </div>
+  <div class="tabbar">
+    <button class="tab-btn active" data-tab="tracker">📋 Tracker</button>
+    <button class="tab-btn" data-tab="alerts">🔔 6 PM Alert</button>
+    <button class="tab-btn" data-tab="report">📊 EOD Report</button>
+    <button class="tab-btn" data-tab="milestones">🏁 Milestones</button>
+  </div>
+  <div class="content">
+    <div id="tab-tracker"></div>
+    <div id="tab-alerts" style="display:none"></div>
+    <div id="tab-report" style="display:none"></div>
+    <div id="tab-milestones" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwH79WsPCBXJGpFUXoXLa7GwoCURuSFXvP4codO4LXJEmQoUUD7PON6EM4T4WInU0Fj/exec";
+
+
+// ─── USERS ────────────────────────────────────────────────────────────────────
+const USERS = {
+  "purna.b@validusfintech.com":           {name:"Purna",    role:"coordinator"},
+  "v-mukesh.shah@validusfintech.com":     {name:"Mukesh",   role:"member"},
+  "krishna.kanneti@validusfintech.com":   {name:"Krishna",  role:"member"},
+  "maqsood.pasha@validusfintech.com":     {name:"Maqsood",  role:"member"},
+  "manmohan@validusfintech.com":          {name:"Manmohan", role:"member"},
+  "nimma.reddy@validusfintech.com":       {name:"Nimma",    role:"member"},
+  "praneeth.sharma@validusfintech.com":   {name:"Praneeth", role:"member"},
+  "soumya.pasikanti@validusfintech.com":  {name:"Soumya",   role:"member"},
+  "nivedita.vasanth@validusfintech.com":  {name:"Nivedita", role:"member"},
+  "ruchita.sagalgile@validusfintech.com": {name:"Ruchita",  role:"member"},
+  "sridhar.kakarala@validusfintech.com":  {name:"Sridhar",  role:"lead"},
+};
+
+const TEAM_COLORS = {
+  Purna:    {bg:"#EBF3FD",c:"#185FA5"}, Maqsood:  {bg:"#EEEDFE",c:"#534AB7"},
+  Manmohan: {bg:"#E1F5EE",c:"#0F6E56"}, Nimma:    {bg:"#FBEAF0",c:"#993556"},
+  Mukesh:   {bg:"#FAEEDA",c:"#854F0B"}, Krishna:  {bg:"#EAF3DE",c:"#3B6D11"},
+  Nivedita: {bg:"#FCEBEB",c:"#A32D2D"}, Ruchita:  {bg:"#F1EFE8",c:"#5F5E5A"},
+  Praneeth: {bg:"#FAECE7",c:"#993C1D"}, Soumya:   {bg:"#E6F1FB",c:"#042C53"},
+  Sridhar:  {bg:"#EEEDFE",c:"#26215C"}, "Whole team":{bg:"#EAF3DE",c:"#27500A"},
+};
+
+const STATUS_STYLES = {
+  "Completed":   {bg:"#EDFBF3",c:"#0F6E56",border:"#9FE1CB",icon:"✓"},
+  "In progress": {bg:"#FFFBEC",c:"#854F0B",border:"#FAC775",icon:"◑"},
+  "Blocked":     {bg:"#FFF0F0",c:"#A32D2D",border:"#F7C1C1",icon:"✕"},
+  "Not started": {bg:"#F6F6F6",c:"#888780",border:"#D3D1C7",icon:"–"},
+};
+
+const RAW_DAYS = [
+  {day:"Day 1",date:"Wed 17 Jun",phase:"Kick off and start the environment",tasks:[
+    {owner:"Sridhar / Purna",task:"Short kickoff call with everyone. Explain the goal and the plan, agree the 10:00 daily standup, set up the shared tracker and a chat group."},
+    {owner:"Purna",task:"Set up the tracker. Confirm the feed generator runs for MFU, NSE and BSE. Make one sample of each and check the format."},
+    {owner:"Mukesh",task:"Start building the sandbox environment. Bring up the servers and point to a clean non-prod database."},
+    {owner:"Krishna",task:"Work with Mukesh. Deploy the latest back-office build, set up the database, take a backup point."},
+    {owner:"Maqsood",task:"Write down the exact cycle we want to show, step by step. One page."},
+    {owner:"Manmohan",task:"Start the scheme master list. Decide schemes, plans, options and the business rules. Share a draft by end of day."},
+    {owner:"Nimma",task:"Look at the back-office tables and the existing synthetic data. List which tables we need to seed for investors and folios."},
+    {owner:"Praneeth",task:"List every login we will need and the access each one needs."},
+    {owner:"Soumya",task:"Start a simple checklist of what good looks like at each step. Nivedita and Ruchita: read the plan and be ready."},
+  ]},
+  {day:"Day 2",date:"Thu 18 Jun",phase:"Environment ready, masters locked",tasks:[
+    {owner:"Mukesh",task:"Finish the environment. Confirm the app is up and all services are running. Share the URL and a test login."},
+    {owner:"Krishna",task:"Sort out any deployment or database issues with Mukesh. Keep a clean backup."},
+    {owner:"Maqsood",task:"Finalise the scheme master and rules with Manmohan. Hand it over for entry."},
+    {owner:"Manmohan",task:"Lock the scheme master and rules. Get ready to enter them in the system."},
+    {owner:"Nimma",task:"Write the seed scripts for the base investors and folios. Keep them ready, do not run yet."},
+    {owner:"Purna",task:"Generate a first proper set of feed files for one cycle, in all three formats."},
+    {owner:"Praneeth",task:"Start creating the logins and roles in the sandbox, with Mukesh on config."},
+    {owner:"Soumya",task:"Finish the QC checklist for each step."},
+  ]},
+  {day:"Day 3",date:"Fri 19 Jun",phase:"Schemes in, base data in",tasks:[
+    {owner:"Manmohan",task:"Enter the scheme master, plans, options and rules. Maqsood checks them."},
+    {owner:"Nimma",task:"Run the investor and folio seed scripts. Share the counts. Fix any gaps."},
+    {owner:"Mukesh",task:"Support any config needed for the schemes and rules."},
+    {owner:"Praneeth",task:"Finish the logins and access. Share the credential list with the team."},
+    {owner:"Purna",task:"Keep the feed files ready, update the tracker, note anything still pending."},
+    {owner:"Soumya",task:"Check the schemes and folios are there and look right."},
+  ]},
+  {day:"Day 4",date:"Mon 22 Jun",phase:"First full end-to-end run (entry to UCR)",tasks:[
+    {owner:"Nimma",task:"Top up investors and folios for a good spread (single, joint, minor, NRI, HUF, corporate)."},
+    {owner:"Manmohan",task:"Register the SIPs. Set up demo SIPs with first installment dated 7 July."},
+    {owner:"Purna",task:"Drop the day's feed files (MFU, NSE, BSE) and prepare the synthetic bank credit file for recon."},
+    {owner:"Manmohan",task:"Capture the day's physical onboarding and transactions as maker."},
+    {owner:"Maqsood",task:"Run the full cycle end to end. Note exactly where it stops."},
+    {owner:"Nimma",task:"Generate the registers and a short daily summary."},
+    {owner:"Soumya",task:"QC each step and write down what broke."},
+  ]},
+  {day:"Day 5",date:"Tue 23 Jun",phase:"End-to-end run — clear yesterday's breaks",tasks:[
+    {owner:"Mukesh / Nivedita / Ruchita",task:"First thing, clear the issues logged on Day 4. Maqsood re-tests."},
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Manmohan",task:"Physical onboarding and transactions as maker."},
+    {owner:"Maqsood",task:"Run the full cycle again, entry to UCR."},
+    {owner:"Nimma",task:"Registers and the recon input file."},
+    {owner:"Soumya",task:"QC. Confirm yesterday's breaks are actually fixed."},
+  ]},
+  {day:"Day 6",date:"Wed 24 Jun",phase:"End-to-end run — add redemptions and switches",tasks:[
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Maqsood",task:"Run the full cycle. Include redemptions and switches. Check exit load works."},
+    {owner:"Manmohan",task:"Rehearse a SIP installment falling due in today's cycle."},
+    {owner:"Nimma",task:"Registers, including the SIP register."},
+    {owner:"Soumya",task:"QC. Devs fix any issues same day."},
+  ]},
+  {day:"Day 7",date:"Thu 25 Jun",phase:"End-to-end run — put in exceptions on purpose",tasks:[
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Maqsood / Soumya",task:"Put in exception cases — rejected feed record, short credit, NIGO application."},
+    {owner:"Maqsood",task:"Run the full cycle, entry to UCR."},
+    {owner:"Manmohan",task:"Confirm the maker / checker rejections behave correctly."},
+    {owner:"Nimma",task:"Exception and rejection registers."},
+  ]},
+  {day:"Day 8",date:"Fri 26 Jun",phase:"Clean end-to-end run and lock the routine",tasks:[
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Maqsood",task:"Run the full cycle clean, entry to UCR, no manual workarounds."},
+    {owner:"Manmohan",task:"Shadow Maqsood on batch close and UCR, and run part of it himself."},
+    {owner:"Nimma",task:"Take a full set of registers as reference."},
+    {owner:"Soumya",task:"QC sign-off for the week."},
+    {owner:"Purna",task:"Confirm the daily routine is repeatable. Update the tracker."},
+  ]},
+  {day:"Day 9",date:"Mon 29 Jun",phase:"Daily cycle + first demo-flow rehearsal",tasks:[
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Maqsood / Manmohan",task:"Run the full cycle, then walk through the exact demo sequence once in order."},
+    {owner:"Nimma",task:"Registers and daily summary."},
+    {owner:"Soumya",task:"QC. Praneeth notes anything awkward in the demo flow."},
+  ]},
+  {day:"Day 10",date:"Tue 30 Jun",phase:"Daily cycle + confirm the SIP pickup",tasks:[
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Manmohan",task:"Make sure a SIP installment falls due today. Confirm demo SIPs still pending for 7 July."},
+    {owner:"Maqsood",task:"Run the full cycle."},
+    {owner:"Nimma",task:"Registers."},
+    {owner:"Soumya",task:"QC."},
+  ]},
+  {day:"Day 11",date:"Wed 1 Jul",phase:"Daily cycle + lock the reference outputs",tasks:[
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Maqsood",task:"Run the full cycle."},
+    {owner:"Nimma",task:"Take a full reference set of registers and reports."},
+    {owner:"Purna",task:"Note the exact folios, investors and SIPs we will use in the live demo."},
+    {owner:"Soumya",task:"QC."},
+  ]},
+  {day:"Day 12",date:"Thu 2 Jul",phase:"Daily cycle + get ready to freeze",tasks:[
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Maqsood",task:"Run a clean cycle. Confirm nothing is left pending in the queues."},
+    {owner:"Maqsood / Manmohan",task:"Re-confirm the demo SIPs are dated for the 7th."},
+    {owner:"Nimma",task:"Final reference registers."},
+    {owner:"Mukesh / Krishna",task:"Get ready to freeze the environment after the dry run."},
+  ]},
+  {day:"Day 13",date:"Fri 3 Jul",phase:"Full dry run (dress rehearsal)",tasks:[
+    {owner:"Maqsood / Manmohan",task:"Run the whole thing as if the client is watching, following the demo script."},
+    {owner:"Praneeth",task:"Coordinate the dry run, keep time, note the rough spots."},
+    {owner:"Soumya",task:"Watch for anything off and log it."},
+    {owner:"Nivedita / Ruchita",task:"On standby for any last fix."},
+    {owner:"Purna",task:"Write up what to fix before handover."},
+  ]},
+  {day:"Day 14",date:"Mon 6 Jul",phase:"Final fixes, freeze, client access",tasks:[
+    {owner:"Nivedita / Ruchita / Mukesh",task:"Clear anything left from the dry run."},
+    {owner:"Mukesh / Krishna",task:"Freeze the environment. Take a backup."},
+    {owner:"Praneeth",task:"Set up the client's view-only login and test it."},
+    {owner:"Maqsood",task:"Reset the demo data to a clean starting point, but keep the pending SIPs."},
+    {owner:"Nimma",task:"Final check that all registers and reports generate cleanly. Soumya: final QC pass."},
+    {owner:"Purna",task:"Prepare the handover note — URL, logins, what to click. Update the tracker."},
+  ]},
+  {day:"Day 15",date:"Tue 7 Jul",phase:"Handover to the client",tasks:[
+    {owner:"Mukesh / Maqsood",task:"Morning smoke test. Log in, run a quick check, confirm everything is up."},
+    {owner:"Sridhar / Praneeth",task:"Hand over the sandbox access and the short guide to the client."},
+    {owner:"Whole team",task:"On standby through the day for any first-use issues."},
+  ]},
+];
+
+// ─── TASK STATE ───────────────────────────────────────────────────────────────
+const tasks = [];
+RAW_DAYS.forEach(d => d.tasks.forEach((t,i) => tasks.push({
+  id:`${d.day}-${i}`, day:d.day, date:d.date, phase:d.phase,
+  owner:t.owner, task:t.task, status:"Not started", note:""
+})));
+
+let currentUser  = null;
+let currentTab   = "tracker";
+let statusFilter = "all";
+let dayFilter    = "all";
+let alertDay     = RAW_DAYS[0].day;
+let alertOwner   = "";
+let alertShown   = false;
+let openDays     = new Set();
+let openTasks    = new Set();
+let noteTimers   = {};
+const LS_KEY     = "validus_tracker_v2";
+
+// ─── LOCAL STORAGE ────────────────────────────────────────────────────────────
+function saveLocal(){
+  const d={};tasks.forEach(t=>{d[t.id]={status:t.status,note:t.note};});
+  try{localStorage.setItem(LS_KEY,JSON.stringify(d));}catch(e){}
+}
+function loadLocal(){
+  try{
+    const raw=localStorage.getItem(LS_KEY); if(!raw)return false;
+    const d=JSON.parse(raw);
+    tasks.forEach(t=>{if(d[t.id]){t.status=d[t.id].status;t.note=d[t.id].note;}});
+    return true;
+  }catch(e){return false;}
+}
+
+// ─── SYNC STATUS ──────────────────────────────────────────────────────────────
+function setSync(s){
+  const el=document.getElementById("sync-status");if(!el)return;
+  const map={
+    local:  ["sync-local","● Local"],
+    saving: ["sync-saving","● Saving…"],
+    ok:     ["sync-ok","● Synced"],
+    error:  ["sync-error","● Offline"],
+  };
+  const[cls,txt]=map[s]||map.local;
+  el.className="sync-pill "+cls; el.textContent=txt;
+}
+
+// ─── GOOGLE APPS SCRIPT API ───────────────────────────────────────────────────
+async function gasRead(){
+  try{
+    const res=await fetch(GAS_URL,{method:"GET"});
+    if(!res.ok) throw new Error(res.status);
+    const rows=await res.json();
+    if(!Array.isArray(rows)||rows.length===0) return false;
+    const map={};
+    rows.forEach(r=>{if(r.id) map[r.id]={status:r.status||"Not started",note:r.note||""};});
+    tasks.forEach(t=>{if(map[t.id]){t.status=map[t.id].status;t.note=map[t.id].note;}});
+    saveLocal();
+    setSync("ok");
+    return true;
+  }catch(e){
+    console.warn("GAS read:",e.message);
+    setSync("error");
+    return false;
+  }
+}
+
+async function gasInit(){
+  try{
+    const res=await fetch(GAS_URL,{
+      method:"POST",
+      headers:{"Content-Type":"text/plain"},
+      body:JSON.stringify({action:"init",tasks:tasks.map(t=>({id:t.id,day:t.day,date:t.date,owner:t.owner,status:t.status,note:t.note}))})
+    });
+    if(!res.ok) throw new Error(res.status);
+    setSync("ok");
+    return true;
+  }catch(e){
+    console.warn("GAS init:",e.message);
+    setSync("error");
+    return false;
+  }
+}
+
+async function gasUpdate(task){
+  setSync("saving");
+  try{
+    const res=await fetch(GAS_URL,{
+      method:"POST",
+      headers:{"Content-Type":"text/plain"},
+      body:JSON.stringify({action:"update",id:task.id,status:task.status,note:task.note})
+    });
+    if(!res.ok) throw new Error(res.status);
+    setSync("ok");
+    return true;
+  }catch(e){
+    console.warn("GAS update:",e.message);
+    setSync("error");
+    return false;
+  }
+}
+
+function debounceSave(task){
+  saveLocal();
+  if(noteTimers[task.id]) clearTimeout(noteTimers[task.id]);
+  noteTimers[task.id]=setTimeout(()=>gasUpdate(task),900);
+}
+
+async function onStatusChange(task){
+  saveLocal();
+  await gasUpdate(task);
+}
+
+async function initSync(){
+  setSync("saving");
+  const hasRows=await gasRead();
+  if(!hasRows) await gasInit();
+}
+
+function startAutoRefresh(){
+  setInterval(async()=>{
+    const ok=await gasRead();
+    if(ok){
+      if(currentTab==="tracker")    renderTracker();
+      if(currentTab==="report")     renderReport();
+      if(currentTab==="milestones") renderMilestones();
+    }
+  },60000);
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function initials(n){return n.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);}
+function ownerColor(o){const f=o.split(/[\/,]/)[0].trim();return TEAM_COLORS[f]||{bg:"#EBF3FD",c:"#185FA5"};}
+function matchesUser(owner,name){return owner.toLowerCase().includes(name.toLowerCase());}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function avatarHTML(owner,size){
+  const col=ownerColor(owner);
+  return `<div class="avatar" style="width:${size}px;height:${size}px;font-size:${Math.floor(size*0.33)}px;background:${col.bg};color:${col.c};border:1.5px solid ${col.c}22">${esc(initials(owner.split("/")[0].trim()))}</div>`;
+}
+function badgeHTML(status){
+  const s=STATUS_STYLES[status]||STATUS_STYLES["Not started"];
+  return `<span class="badge" style="background:${s.bg};color:${s.c};border:1px solid ${s.border}">${s.icon} ${esc(status)}</span>`;
+}
+function calcStats(){
+  const total=tasks.length,done=tasks.filter(t=>t.status==="Completed").length,
+    blocked=tasks.filter(t=>t.status==="Blocked").length,
+    inprog=tasks.filter(t=>t.status==="In progress").length;
+  return{total,done,blocked,inprog,pct:Math.round((done/total)*100)};
+}
+function generateReportText(){
+  const{total,done,blocked,inprog,pct}=calcStats();
+  const today=new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  const sep="─".repeat(52);
+  let txt=`VALIDUS FINTECH — MF RTA SANDBOX SETUP\nEND-OF-DAY CONSOLIDATED REPORT\n${today}\nTo: Ganesh Venkatachalam (CEO) · CTO, Validus Fintech\n${sep}\n\n`;
+  txt+=`OVERALL PROGRESS\n  Completed : ${done} of ${total} tasks (${pct}%)\n  In progress: ${inprog}  |  Blocked: ${blocked}  |  Not started: ${total-done-blocked-inprog}\n  Target handover: Tue 7 Jul\n\n`;
+  const bl=tasks.filter(t=>t.status==="Blocked");
+  if(bl.length){txt+=`BLOCKED ITEMS\n`;bl.forEach(t=>{txt+=`  • ${t.owner} (${t.day}): ${t.task.slice(0,80)}${t.note?` [${t.note}]`:""}\n`;});txt+="\n";}
+  const byP={};
+  tasks.forEach(t=>t.owner.split(/[\/,]/).map(s=>s.trim()).filter(Boolean).forEach(p=>{
+    if(!TEAM_COLORS[p])return;if(!byP[p])byP[p]={done:0,blocked:0,total:0};
+    byP[p].total++;if(t.status==="Completed")byP[p].done++;else if(t.status==="Blocked")byP[p].blocked++;
+  }));
+  txt+=`STATUS BY TEAM MEMBER\n`;
+  Object.entries(byP).sort((a,b)=>b[1].done-a[1].done).forEach(([n,st])=>{
+    const p=st.total>0?Math.round((st.done/st.total)*100):0;
+    txt+=`  ${n.padEnd(14)} ${st.done}/${st.total} (${p}%)${st.blocked>0?`  ⚠ ${st.blocked} blocked`:""}\n`;
+  });
+  txt+=`\n${sep}\nAuto-generated by Validus MF RTA Sandbox Tracker.\n`;
+  return txt;
+}
+
+// ─── RENDER: TRACKER ─────────────────────────────────────────────────────────
+function renderTracker(){
+  const{total,done,blocked,pct}=calcStats();
+  let html=`<div class="metrics">
+    <div class="metric-card"><div class="metric-label">Total tasks</div><div class="metric-val" style="color:#0C2554">${total}</div></div>
+    <div class="metric-card"><div class="metric-label">Completed</div><div class="metric-val" style="color:#0F6E56">${done}</div></div>
+    <div class="metric-card"><div class="metric-label">Blocked</div><div class="metric-val" style="color:#A32D2D">${blocked}</div></div>
+    <div class="metric-card"><div class="metric-label">Progress</div><div class="metric-val" style="color:${pct>=80?"#0F6E56":pct>=40?"#854F0B":"#0C2554"}">${pct}%</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+  <div class="filter-bar">`;
+  ["all","Not started","In progress","Completed","Blocked"].forEach(f=>{
+    html+=`<button class="chip${statusFilter===f?" active":""}" data-sf="${esc(f)}">${f==="all"?"All":esc(f)}</button>`;
+  });
+  html+=`<select class="chip-select" id="day-filter">`;
+  ["all",...RAW_DAYS.map(d=>d.day)].forEach(d=>{html+=`<option value="${esc(d)}"${dayFilter===d?" selected":""}>${d==="all"?"All days":esc(d)}</option>`;});
+  html+=`</select>
+    <button class="chip" id="expand-all" style="margin-left:auto">Expand all</button>
+    <button class="chip" id="collapse-all">Collapse all</button>
+  </div>`;
+
+  RAW_DAYS.forEach(raw=>{
+    if(dayFilter!=="all"&&raw.day!==dayFilter) return;
+    const allDay=tasks.filter(t=>t.day===raw.day);
+    const filtered=statusFilter==="all"?allDay:allDay.filter(t=>t.status===statusFilter);
+    if(statusFilter!=="all"&&!filtered.length) return;
+    const ds={done:allDay.filter(t=>t.status==="Completed").length,inprog:allDay.filter(t=>t.status==="In progress").length,blocked:allDay.filter(t=>t.status==="Blocked").length,ns:allDay.filter(t=>t.status==="Not started").length};
+    const isOpen=openDays.has(raw.day);
+    let pills="";
+    if(ds.done)    pills+=`<span class="mini-pill pill-done">✓ ${ds.done}</span>`;
+    if(ds.inprog)  pills+=`<span class="mini-pill pill-prog">◑ ${ds.inprog}</span>`;
+    if(ds.blocked) pills+=`<span class="mini-pill pill-block">✕ ${ds.blocked}</span>`;
+    if(ds.ns)      pills+=`<span class="mini-pill pill-ns">– ${ds.ns}</span>`;
+    html+=`<div class="acc-day">
+      <div class="acc-day-header${isOpen?" open":""}" data-day-toggle="${esc(raw.day)}">
+        <div class="acc-day-left">
+          <span class="acc-day-tag">${esc(raw.day)}</span>
+          <div><div class="acc-day-phase">${esc(raw.phase)}</div>
+          <div class="acc-day-date">${esc(raw.date)} · ${allDay.length} tasks</div></div>
+        </div>
+        <div class="acc-day-right">
+          <div class="acc-day-pills">${pills}</div>
+          <span class="acc-chevron${isOpen?" open":""}">▼</span>
+        </div>
+      </div>
+      <div class="acc-day-body${isOpen?" open":""}">`;
+    if(!filtered.length){html+=`<div class="empty-msg">No tasks match the filter.</div>`;}
+    filtered.forEach(t=>{
+      const mine=currentUser&&matchesUser(t.owner,currentUser.name);
+      const isTaskOpen=openTasks.has(t.id);
+      html+=`<div class="acc-task${mine?" mine":""}">
+        <div class="acc-task-header" data-task-toggle="${esc(t.id)}">
+          <div class="acc-task-left">
+            ${avatarHTML(t.owner,24)}
+            <span class="acc-task-owner">${esc(t.owner)}</span>
+            <span class="acc-task-preview">${esc(t.task)}</span>
+          </div>
+          <div class="acc-task-right">
+            ${mine?`<span class="mine-tag">MY TASK</span>`:""}
+            ${badgeHTML(t.status)}
+            <span class="acc-task-chevron${isTaskOpen?" open":""}">▼</span>
+          </div>
+        </div>
+        <div class="acc-task-body${isTaskOpen?" open":""}">
+          <div class="task-full-text">${esc(t.task)}</div>`;
+      if(mine){
+        html+=`<div class="task-actions">
+          ${["Completed","In progress","Blocked"].map(s=>{const ss=STATUS_STYLES[s];return`<button class="status-btn" data-tid="${esc(t.id)}" data-status="${esc(s)}" style="border-color:${ss.border};background:${t.status===s?ss.bg:"#fff"};color:${ss.c};font-weight:${t.status===s?700:400}">${esc(s)}</button>`;}).join("")}
+          <input class="task-note-input" type="text" data-note="${esc(t.id)}" value="${esc(t.note)}" placeholder="Add note…"/>
+        </div>`;
+      }else if(t.note){
+        html+=`<div class="task-note-display">Note: ${esc(t.note)}</div>`;
+      }
+      html+=`</div></div>`;
+    });
+    html+=`</div></div>`;
+  });
+
+  const el=document.getElementById("tab-tracker");
+  el.innerHTML=html;
+  el.querySelectorAll(".chip[data-sf]").forEach(b=>b.addEventListener("click",()=>{statusFilter=b.dataset.sf;renderTracker();}));
+  el.querySelector("#day-filter").addEventListener("change",e=>{dayFilter=e.target.value;renderTracker();});
+  el.querySelector("#expand-all").addEventListener("click",()=>{RAW_DAYS.forEach(d=>openDays.add(d.day));renderTracker();});
+  el.querySelector("#collapse-all").addEventListener("click",()=>{openDays.clear();openTasks.clear();renderTracker();});
+  el.querySelectorAll("[data-day-toggle]").forEach(h=>h.addEventListener("click",()=>{const d=h.dataset.dayToggle;openDays.has(d)?openDays.delete(d):openDays.add(d);renderTracker();}));
+  el.querySelectorAll("[data-task-toggle]").forEach(h=>h.addEventListener("click",()=>{const id=h.dataset.taskToggle;openTasks.has(id)?openTasks.delete(id):openTasks.add(id);renderTracker();}));
+  el.querySelectorAll(".status-btn").forEach(b=>b.addEventListener("click",e=>{
+    e.stopPropagation();
+    const t=tasks.find(x=>x.id===b.dataset.tid);
+    if(t){t.status=b.dataset.status;renderTracker();renderReport();onStatusChange(t);}
+  }));
+  el.querySelectorAll("input[data-note]").forEach(inp=>{
+    inp.addEventListener("click",e=>e.stopPropagation());
+    inp.addEventListener("input",()=>{const t=tasks.find(x=>x.id===inp.dataset.note);if(t){t.note=inp.value;debounceSave(t);}});
+  });
+}
+
+// ─── RENDER: ALERTS ──────────────────────────────────────────────────────────
+function renderAlerts(){
+  const allOwners=[...new Set(RAW_DAYS.flatMap(d=>d.tasks.map(t=>t.owner.split(/[\/,]/)[0].trim())))].filter(o=>TEAM_COLORS[o]);
+  if(!alertOwner) alertOwner=currentUser?currentUser.name:allOwners[0];
+  let html=`<div class="alert-banner"><span style="font-size:18px">🔔</span>
+    <div><div style="font-size:12px;font-weight:700;color:#854F0B;margin-bottom:2px">6 PM daily status alert</div>
+    <div style="font-size:11px;color:#854F0B">Preview and update each team member's tasks for the day.</div></div></div>
+  <div class="alert-card">
+    <div style="font-weight:700;font-size:13px;margin-bottom:12px;color:#0C2554">Configure &amp; preview</div>
+    <div class="form-row">
+      <div class="form-group"><label>Day</label>
+        <select id="al-day">${RAW_DAYS.map(d=>`<option value="${esc(d.day)}"${alertDay===d.day?" selected":""}>${esc(d.day)} · ${esc(d.date)}</option>`).join("")}</select>
+      </div>
+      <div class="form-group"><label>Team member</label>
+        <select id="al-owner">${allOwners.map(o=>`<option value="${esc(o)}"${alertOwner===o?" selected":""}>${esc(o)}</option>`).join("")}</select>
+      </div>
+    </div>
+    <button class="btn-preview" id="al-preview-btn">Preview alert →</button>
+  </div>`;
+  if(alertShown){
+    const myTasks=tasks.filter(t=>t.day===alertDay&&matchesUser(t.owner,alertOwner));
+    const dateLabel=RAW_DAYS.find(d=>d.day===alertDay)?.date||"";
+    html+=`<div class="preview-card">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
+        ${avatarHTML(alertOwner,36)}
+        <div><div style="font-weight:700;font-size:13px">To: ${esc(alertOwner)}</div>
+        <div style="font-size:11px;color:#888">${esc(alertDay)} · ${esc(dateLabel)} · 6:00 PM</div></div>
+      </div>
+      <div class="preview-msg-box">
+        <div style="font-weight:700;margin-bottom:8px;color:#0C2554">Hi ${esc(alertOwner)} 👋 — it's 6 PM. Please update your task status for today (${esc(dateLabel)}).</div>`;
+    if(!myTasks.length) html+=`<div style="color:#aaa;font-size:11px">No tasks assigned for this day.</div>`;
+    myTasks.forEach((t,i)=>{
+      html+=`<div style="margin-bottom:6px;padding-bottom:6px;border-bottom:${i<myTasks.length-1?"1px solid #E8EDF5":"none"}">
+        <div style="font-size:12px"><strong>${i+1}. ${esc(t.task.slice(0,100))}${t.task.length>100?"…":""}</strong></div>
+        <div style="font-size:10px;color:#888;margin-top:2px">Status: ${esc(t.status)}</div></div>`;
+    });
+    html+=`<div style="margin-top:10px;font-size:11px;color:#888;border-top:1px solid #E8EDF5;padding-top:8px">Mark each task and add a note if pending or blocked.</div></div>`;
+    myTasks.forEach(t=>{
+      html+=`<div class="update-row">
+        <div style="font-size:11px;color:#555">${esc(t.task.slice(0,90))}${t.task.length>90?"…":""}</div>
+        <div class="update-controls">
+          <select data-al-tid="${esc(t.id)}">${["Not started","In progress","Completed","Blocked"].map(s=>`<option${t.status===s?" selected":""}>${esc(s)}</option>`).join("")}</select>
+          <input type="text" data-al-note="${esc(t.id)}" value="${esc(t.note)}" placeholder="Note if pending or blocked…"/>
+        </div></div>`;
+    });
+    html+=`<button class="btn-save" id="al-save-btn">Save &amp; sync</button></div>`;
+  }
+  const el=document.getElementById("tab-alerts");
+  el.innerHTML=html;
+  el.querySelector("#al-day").addEventListener("change",e=>{alertDay=e.target.value;alertShown=false;renderAlerts();});
+  el.querySelector("#al-owner").addEventListener("change",e=>{alertOwner=e.target.value;alertShown=false;renderAlerts();});
+  el.querySelector("#al-preview-btn").addEventListener("click",()=>{alertDay=el.querySelector("#al-day").value;alertOwner=el.querySelector("#al-owner").value;alertShown=true;renderAlerts();});
+  if(alertShown){
+    el.querySelectorAll("select[data-al-tid]").forEach(sel=>sel.addEventListener("change",()=>{const t=tasks.find(x=>x.id===sel.dataset.alTid);if(t)t.status=sel.value;}));
+    el.querySelectorAll("input[data-al-note]").forEach(inp=>inp.addEventListener("input",()=>{const t=tasks.find(x=>x.id===inp.dataset.alNote);if(t)t.note=inp.value;}));
+    el.querySelector("#al-save-btn").addEventListener("click",async()=>{
+      const btn=el.querySelector("#al-save-btn");
+      btn.textContent="Saving…";btn.disabled=true;
+      const myTasks=tasks.filter(t=>t.day===alertDay&&matchesUser(t.owner,alertOwner));
+      saveLocal();
+      for(const t of myTasks) await gasUpdate(t);
+      renderTracker();renderReport();
+      btn.textContent="✓ Saved!";btn.style.background="#0F6E56";
+      setTimeout(()=>{btn.textContent="Save & sync";btn.style.background="#0C2554";btn.disabled=false;},2500);
+    });
+  }
+}
+
+// ─── RENDER: REPORT ──────────────────────────────────────────────────────────
+function renderReport(){
+  const{total,done,blocked,inprog,pct}=calcStats();
+  const today=new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  const isPurna=currentUser&&currentUser.name==="Purna";
+  const byP={};
+  tasks.forEach(t=>t.owner.split(/[\/,]/).map(s=>s.trim()).filter(Boolean).forEach(p=>{
+    if(!TEAM_COLORS[p])return;if(!byP[p])byP[p]={done:0,blocked:0,inprog:0,total:0};
+    byP[p].total++;if(t.status==="Completed")byP[p].done++;else if(t.status==="Blocked")byP[p].blocked++;else if(t.status==="In progress")byP[p].inprog++;
+  }));
+  const bl=tasks.filter(t=>t.status==="Blocked");
+  let html=`<div class="report-header">
+    <div>
+      <div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px">End-of-day consolidated report</div>
+      <div style="font-size:16px;font-weight:800;color:#0C2554">MF RTA Sandbox Setup</div>
+      <div style="font-size:11px;color:#888;margin-top:2px">To: Ganesh Venkatachalam (CEO) · CTO · ${esc(today)}</div>
+    </div>
+    <div class="report-btns">
+      <button class="btn-copy" id="rpt-copy-btn">📋 Copy</button>
+      ${isPurna?`<button class="btn-download" id="rpt-dl-btn">⬇ Download</button>`:""}
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric-card" style="text-align:center"><div class="metric-val" style="color:#0C2554">${total}</div><div class="metric-label">Total</div></div>
+    <div class="metric-card" style="text-align:center"><div class="metric-val" style="color:#0F6E56">${done}</div><div class="metric-label">Completed</div></div>
+    <div class="metric-card" style="text-align:center"><div class="metric-val" style="color:#A32D2D">${blocked}</div><div class="metric-label">Blocked</div></div>
+    <div class="metric-card" style="text-align:center"><div class="metric-val" style="color:#185FA5">${pct}%</div><div class="metric-label">Progress</div></div>
+  </div>
+  <div class="progress-bar" style="height:7px"><div class="progress-fill" style="width:${pct}%"></div></div>
+  <div class="section-label" style="margin-top:4px">Status by team member</div>`;
+  Object.entries(byP).sort((a,b)=>b[1].done-a[1].done).forEach(([name,st])=>{
+    const p=st.total>0?Math.round((st.done/st.total)*100):0;const col=ownerColor(name);
+    html+=`<div class="person-row">${avatarHTML(name,24)}
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+          <span style="font-size:12px;font-weight:700">${esc(name)}</span>
+          <span style="font-size:11px;color:#888">${st.done}/${st.total}${st.blocked>0?` · <span style="color:#A32D2D;font-weight:700">${st.blocked} blocked</span>`:""}</span>
+        </div>
+        <div class="mini-bar"><div class="mini-fill" style="width:${p}%;background:${col.c}"></div></div>
+      </div></div>`;
+  });
+  if(bl.length){
+    html+=`<div class="section-label" style="color:#A32D2D;margin-top:16px">⚠ Blocked items</div>`;
+    bl.forEach(t=>{html+=`<div class="blocked-item"><div style="font-size:12px;font-weight:700;color:#A32D2D">${esc(t.owner)} · ${esc(t.day)}</div><div style="font-size:11px;color:#555;margin-top:2px">${esc(t.task.slice(0,110))}</div>${t.note?`<div style="font-size:10px;color:#888;font-style:italic;margin-top:3px">Note: ${esc(t.note)}</div>`:""}</div>`;});
+  }
+  html+=`<div class="summary-box"><strong>Summary for CEO / CTO:</strong> As of ${esc(today)}, ${done} of ${total} tasks completed (${pct}%).${blocked>0?` ${blocked} blocked item(s) need attention.`:" No items blocked."}${inprog>0?` ${inprog} in progress.`:""} Handover: <strong>Tue 7 Jul</strong>.</div>`;
+  const el=document.getElementById("tab-report");
+  el.innerHTML=html;
+  el.querySelector("#rpt-copy-btn").addEventListener("click",function(){
+    navigator.clipboard.writeText(generateReportText()).then(()=>{this.textContent="✓ Copied!";this.style.background="#EDFBF3";this.style.color="#0F6E56";this.style.fontWeight="700";setTimeout(()=>{this.textContent="📋 Copy";this.style.background="";this.style.color="";this.style.fontWeight="";},2000);}).catch(()=>{});
+  });
+  if(isPurna){
+    el.querySelector("#rpt-dl-btn").addEventListener("click",()=>{
+      const blob=new Blob([generateReportText()],{type:"text/plain;charset=utf-8"});
+      const url=URL.createObjectURL(blob);const a=document.createElement("a");
+      a.href=url;a.download=`Validus_EOD_Report_${new Date().toISOString().slice(0,10)}.txt`;
+      document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+    });
+  }
+}
+
+// ─── RENDER: MILESTONES ───────────────────────────────────────────────────────
+function renderMilestones(){
+  const ms=[
+    {by:"Fri 19 Jun",day:"Day 3",label:"M1 — Environment & base data ready",desc:"Environment up, schemes in, investors seeded, logins ready, feed files generated."},
+    {by:"Fri 26 Jun",day:"Day 8",label:"M2 — Daily cycle running clean",desc:"End-to-end cycle running clean entry to UCR. Exceptions covered. Demo SIPs set for 7 Jul."},
+    {by:"Fri 3 Jul",day:"Day 13",label:"M3 — Dry run complete",desc:"Cycles stable, demo flow rehearsed, reference outputs locked, dress rehearsal done."},
+    {by:"Tue 7 Jul",day:"Day 15",label:"M4 — Client handover",desc:"Sandbox handed over to the client. All access and documentation provided."},
+  ];
+  let html=`<div style="font-size:12px;color:#555;margin-bottom:16px;line-height:1.6">Four milestone gates across the 15-day plan.</div>`;
+  ms.forEach(m=>{
+    const idx=RAW_DAYS.findIndex(d=>d.day===m.day);
+    const ids=RAW_DAYS.slice(0,idx+1).flatMap((d,di)=>d.tasks.map((_,ti)=>`${d.day}-${ti}`));
+    const rel=tasks.filter(t=>ids.includes(t.id));
+    const dn=rel.filter(t=>t.status==="Completed").length;
+    const p=rel.length>0?Math.round((dn/rel.length)*100):0;
+    const c=p===100?"#0F6E56":p>0?"#854F0B":"#888";
+    html+=`<div class="milestone-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">
+        <div><div style="font-size:13px;font-weight:700;color:#0C2554;margin-bottom:2px">${esc(m.label)}</div>
+        <div style="font-size:11px;color:#888">Target: ${esc(m.by)}</div></div>
+        <div style="font-size:18px;font-weight:800;color:${c}">${p}%</div>
+      </div>
+      <div style="font-size:11px;color:#555;margin-bottom:8px;line-height:1.5">${esc(m.desc)}</div>
+      <div class="progress-bar" style="margin-bottom:0"><div class="progress-fill" style="width:${p}%;background:${p===100?"#0F6E56":"#185FA5"}"></div></div>
+    </div>`;
+  });
+  document.getElementById("tab-milestones").innerHTML=html;
+}
+
+// ─── TAB SWITCHING ────────────────────────────────────────────────────────────
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
+  ["tracker","alerts","report","milestones"].forEach(t=>{document.getElementById(`tab-${t}`).style.display=t===tab?"block":"none";});
+  if(tab==="tracker")    renderTracker();
+  if(tab==="alerts")     renderAlerts();
+  if(tab==="report")     renderReport();
+  if(tab==="milestones") renderMilestones();
+}
+
+// ─── LOGIN ────────────────────────────────────────────────────────────────────
+async function doLogin(){
+  const email=document.getElementById("email-input").value.trim().toLowerCase();
+  const errEl=document.getElementById("login-error"),inp=document.getElementById("email-input"),btn=document.getElementById("login-btn");
+  const user=USERS[email];
+  if(!user){errEl.style.display="block";inp.classList.add("error");return;}
+  errEl.style.display="none";inp.classList.remove("error");
+  btn.textContent="Loading…";btn.disabled=true;
+  currentUser={email,...user};
+  alertOwner=user.name;
+
+  // Show app immediately with local data
+  loadLocal();
+  document.getElementById("login-screen").style.display="none";
+  document.getElementById("app-screen").style.display="block";
+  const av=document.getElementById("topbar-avatar");
+  const col=ownerColor(user.name);
+  av.textContent=initials(user.name);av.style.background=col.bg;av.style.color=col.c;av.style.border=`1.5px solid ${col.c}22`;
+  document.getElementById("topbar-name").textContent=user.name;
+
+  // Open today's day accordion
+  const todayRaw=new Date().toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
+  const todayDay=RAW_DAYS.find(d=>d.date.toLowerCase()===todayRaw.toLowerCase());
+  openDays.add(todayDay?todayDay.day:RAW_DAYS[0].day);
+
+  switchTab("tracker");
+
+  // Sync with SheetDB in background
+  initSync().then(()=>{renderTracker();renderReport();});
+  startAutoRefresh();
+}
+
+document.getElementById("login-btn").addEventListener("click",doLogin);
+document.getElementById("email-input").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+document.getElementById("signout-btn").addEventListener("click",()=>{
+  currentUser=null;alertShown=false;openDays.clear();openTasks.clear();
+  document.getElementById("app-screen").style.display="none";
+  document.getElementById("login-screen").style.display="flex";
+  document.getElementById("email-input").value="";
+  document.getElementById("login-error").style.display="none";
+  document.getElementById("email-input").classList.remove("error");
+  document.getElementById("login-btn").textContent="Sign in →";
+  document.getElementById("login-btn").disabled=false;
+});
+document.querySelectorAll(".tab-btn").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
+</script>
+</body>
+</html>
