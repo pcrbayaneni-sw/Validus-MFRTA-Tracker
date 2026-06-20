@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Validus — CEO Email Composer</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#F0F4FA;color:#1a1a1a;font-size:13px;min-height:100vh}
+input,select,textarea,button{font-family:inherit;font-size:13px}
+button{cursor:pointer}
+textarea:focus,input:focus,select:focus{outline:2px solid #185FA5;outline-offset:1px}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:#C0C8D8;border-radius:3px}
+
+.header{background:#0C2554;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.header-left .sub{font-size:10px;font-weight:700;letter-spacing:0.16em;color:#7BA7D9;text-transform:uppercase}
+.header-left .title{font-size:15px;font-weight:800;color:#fff;margin-top:1px}
+.header-right{font-size:11px;color:#7BA7D9;text-align:right;line-height:1.6}
+
+/* SYNC BANNER */
+.sync-banner{background:#1A3060;border-bottom:1px solid #0C2554;padding:8px 28px;display:flex;align-items:center;gap:10px;font-size:11px;color:#C8D9EE}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#4ADE80;flex-shrink:0}
+.sync-dot.loading{background:#FCD34D;animation:pulse 1s infinite}
+.sync-dot.error{background:#FCA5A5}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.btn-sync{padding:3px 12px;background:#185FA5;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:600;margin-left:auto}
+
+/* LIVE STATS BAR */
+.stats-bar{background:#fff;border-bottom:1px solid #E0E6F0;padding:10px 28px;display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.stat-item{display:flex;flex-direction:column;align-items:center;gap:1px}
+.stat-val{font-size:18px;font-weight:800}
+.stat-label{font-size:9px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.06em}
+.stat-divider{width:1px;height:32px;background:#E8EDF5}
+.on-track-pill{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700}
+.pill-green{background:#EDFBF3;color:#0F6E56}
+.pill-amber{background:#FFFBEC;color:#854F0B}
+.pill-red{background:#FFF0F0;color:#A32D2D}
+
+/* MAIN LAYOUT */
+.main{display:grid;grid-template-columns:310px 1fr;gap:0;min-height:calc(100vh - 130px)}
+
+/* LEFT PANEL */
+.left-panel{background:#fff;border-right:1px solid #E0E6F0;padding:18px 16px;overflow-y:auto;max-height:calc(100vh - 130px)}
+.panel-section{margin-bottom:20px}
+.panel-title{font-size:10px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #E8EDF5;display:flex;align-items:center;gap:6px}
+.live-tag{font-size:9px;background:#EDFBF3;color:#0F6E56;padding:1px 6px;border-radius:10px;font-weight:700}
+
+/* TYPE BUTTONS */
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.type-btn{padding:7px 5px;border:1.5px solid #E0E6F0;border-radius:7px;background:#fff;color:#555;font-size:11px;font-weight:500;text-align:center;transition:all .15s}
+.type-btn.active{border-color:#0C2554;background:#0C2554;color:#fff;font-weight:700}
+.tone-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
+.tone-btn{padding:6px 4px;border:1px solid #E0E6F0;border-radius:6px;background:#fff;color:#555;font-size:10px;font-weight:500;text-align:center;transition:all .15s}
+.tone-btn.active{border-color:#185FA5;background:#EBF3FD;color:#185FA5;font-weight:700}
+
+/* LIVE PULLED DATA */
+.live-section{background:#F7FFF9;border:1px solid #9FE1CB;border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.live-section-title{font-size:10px;font-weight:700;color:#0F6E56;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:7px}
+.live-item{font-size:11px;color:#333;padding:3px 0;border-bottom:1px solid #E8F5EE;display:flex;gap:6px;align-items:flex-start;line-height:1.4}
+.live-item:last-child{border-bottom:none}
+.live-item-dot{width:6px;height:6px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.no-data{font-size:11px;color:#aaa;font-style:italic}
+
+/* MILESTONE PILLS */
+.milestone-pills{display:flex;flex-direction:column;gap:5px}
+.m-pill{display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid #E0E6F0;border-radius:6px;background:#fff}
+.m-pill-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.m-pill-label{font-size:11px;font-weight:500;color:#333;flex:1}
+.m-pill-status{font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;white-space:nowrap}
+
+/* FORM */
+.form-group{margin-bottom:10px}
+.form-group label{display:block;font-size:10px;font-weight:700;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em;display:flex;align-items:center;gap:5px}
+.auto-tag{font-size:9px;background:#EBF3FD;color:#185FA5;padding:1px 5px;border-radius:8px;font-weight:700}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:7px 10px;border:1px solid #D3D1C7;border-radius:7px;font-size:12px;color:#1a1a1a;background:#FAFAFA;resize:vertical}
+.form-group textarea{min-height:64px;line-height:1.5}
+.auto-filled{background:#F0F8FF !important;border-color:#C5D8F5 !important;color:#185FA5 !important}
+
+/* STATUS ROW */
+.status-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.status-row label{font-size:11px;color:#555;width:68px;flex-shrink:0}
+.pct-input{width:50px;padding:5px 7px;border:1px solid #D3D1C7;border-radius:6px;font-size:11px;text-align:center}
+.pct-input.auto-filled{background:#F0F8FF;border-color:#C5D8F5;color:#185FA5;font-weight:700}
+
+/* BUTTONS */
+.btn-generate{width:100%;padding:10px;background:#0C2554;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;margin-bottom:7px}
+.btn-generate:hover{background:#1A3A6E}
+.btn-generate:disabled{background:#7BA7D9;cursor:not-allowed}
+.btn-clear{width:100%;padding:8px;background:#fff;color:#888;border:1px solid #D3D1C7;border-radius:8px;font-size:12px}
+
+/* RIGHT PANEL */
+.right-panel{display:flex;flex-direction:column;padding:18px 22px;overflow-y:auto;max-height:calc(100vh - 130px)}
+.email-meta{background:#fff;border:1px solid #E0E6F0;border-radius:10px 10px 0 0;padding:12px 16px;border-bottom:none}
+.meta-row{display:flex;align-items:center;gap:10px;padding:4px 0;border-bottom:1px solid #F0F0F0}
+.meta-row:last-child{border-bottom:none}
+.meta-label{font-size:11px;font-weight:700;color:#888;width:50px;flex-shrink:0;text-transform:uppercase;letter-spacing:0.04em}
+.meta-value{font-size:12px;color:#1a1a1a;flex:1}
+.meta-value input{width:100%;border:none;background:none;font-size:12px;color:#1a1a1a;outline:none;padding:0}
+.email-body-wrap{background:#fff;border:1px solid #E0E6F0;border-radius:0 0 10px 10px;flex:1;display:flex;flex-direction:column}
+.email-toolbar{padding:7px 12px;border-bottom:1px solid #F0F0F0;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.toolbar-btn{padding:3px 10px;border:1px solid #D3D1C7;border-radius:5px;background:#fff;color:#555;font-size:11px}
+.toolbar-btn:hover{background:#F7F9FC}
+.toolbar-divider{width:1px;height:16px;background:#E0E6F0;margin:0 2px}
+.email-textarea{flex:1;width:100%;padding:16px 18px;border:none;resize:none;font-size:13px;line-height:1.8;color:#1a1a1a;background:#fff;border-radius:0 0 10px 10px;min-height:380px}
+.email-textarea:focus{outline:none}
+.email-placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;text-align:center;color:#aaa;gap:10px;min-height:380px}
+.email-placeholder .icon{font-size:36px;opacity:.4}
+.email-placeholder p{font-size:13px;line-height:1.6;max-width:300px}
+.action-bar{display:flex;gap:7px;margin-top:12px;align-items:center;flex-wrap:wrap}
+.btn-copy-email{padding:9px 18px;background:#0C2554;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700}
+.btn-open-mail{padding:9px 18px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700}
+.btn-secondary{padding:9px 14px;background:#fff;color:#555;border:1px solid #D3D1C7;border-radius:8px;font-size:12px}
+.word-count{font-size:11px;color:#aaa;margin-left:auto}
+
+/* DRAFTS */
+.draft-list{display:flex;flex-direction:column;gap:5px}
+.draft-item{padding:8px 10px;border:1px solid #E0E6F0;border-radius:7px}
+.draft-item-title{font-size:11px;font-weight:700;color:#1a1a1a}
+.draft-item-meta{font-size:10px;color:#aaa;margin-top:1px}
+.draft-item-actions{display:flex;gap:4px;margin-top:5px}
+.draft-action-btn{font-size:10px;padding:2px 8px;border:1px solid #D3D1C7;border-radius:4px;background:#fff;color:#555}
+.no-drafts{font-size:11px;color:#aaa;text-align:center;padding:10px 0}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:#0C2554;color:#fff;padding:9px 16px;border-radius:8px;font-size:12px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="sub">Validus Fintech Services</div>
+    <div class="title">CEO Email Composer</div>
+  </div>
+  <div class="header-right">
+    MF RTA Sandbox Setup · 17 Jun – 7 Jul 2026<br>
+    To: Ganesh Venkatachalam, CEO
+  </div>
+</div>
+
+<!-- SYNC BANNER -->
+<div class="sync-banner">
+  <div class="sync-dot loading" id="sync-dot"></div>
+  <span id="sync-msg">Pulling latest data from tracker sheet…</span>
+  <button class="btn-sync" id="refresh-btn">↺ Refresh</button>
+</div>
+
+<!-- MANUAL FALLBACK BANNER -->
+<div id="manual-entry-banner" style="display:none;background:#FFF8E1;border-bottom:1px solid #FFE082;padding:8px 28px;font-size:11px;color:#5D4037;display:none;align-items:center;gap:10px;flex-wrap:wrap">
+  <span>⚠ Sheet unavailable — enter progress manually below to still generate your email.</span>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px">
+    <label style="font-size:11px;color:#5D4037">Tasks done: <input type="number" id="manual-done" value="0" min="0" max="75" style="width:48px;padding:3px 6px;border:1px solid #FFE082;border-radius:5px;font-size:11px"/></label>
+    <label style="font-size:11px;color:#5D4037">Total: <input type="number" id="manual-total" value="75" min="1" style="width:48px;padding:3px 6px;border:1px solid #FFE082;border-radius:5px;font-size:11px"/></label>
+    <label style="font-size:11px;color:#5D4037">Blocked: <input type="number" id="manual-blocked" value="0" min="0" style="width:48px;padding:3px 6px;border:1px solid #FFE082;border-radius:5px;font-size:11px"/></label>
+    <label style="font-size:11px;color:#5D4037">In progress: <input type="number" id="manual-inprog" value="0" min="0" style="width:48px;padding:3px 6px;border:1px solid #FFE082;border-radius:5px;font-size:11px"/></label>
+    <button onclick="applyManual()" style="padding:3px 12px;background:#5D4037;color:#fff;border:none;border-radius:5px;font-size:11px;cursor:pointer">Apply</button>
+  </div>
+</div>
+
+<!-- LIVE STATS BAR -->
+<div class="stats-bar" id="stats-bar">
+  <div class="stat-item"><div class="stat-val" id="s-done" style="color:#0F6E56">—</div><div class="stat-label">Completed</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat-item"><div class="stat-val" id="s-total" style="color:#0C2554">75</div><div class="stat-label">Total tasks</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat-item"><div class="stat-val" id="s-pct" style="color:#185FA5">0%</div><div class="stat-label">Progress</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat-item"><div class="stat-val" id="s-blocked" style="color:#A32D2D">—</div><div class="stat-label">Blocked</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat-item"><div class="stat-val" id="s-inprog" style="color:#854F0B">—</div><div class="stat-label">In progress</div></div>
+  <div class="stat-divider"></div>
+  <span class="on-track-pill pill-amber" id="on-track-pill">Loading…</span>
+</div>
+
+<div class="main">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+
+    <div class="panel-section">
+      <div class="panel-title">Email type</div>
+      <div class="type-grid">
+        <button class="type-btn active" data-type="daily">📅 Daily update</button>
+        <button class="type-btn" data-type="weekly">📊 Weekly summary</button>
+        <button class="type-btn" data-type="milestone">🏁 Milestone reached</button>
+        <button class="type-btn" data-type="blocker">⚠️ Blocker alert</button>
+        <button class="type-btn" data-type="handover">🎯 Handover ready</button>
+        <button class="type-btn" data-type="custom">✏️ Custom</button>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-title">Tone</div>
+      <div class="tone-grid">
+        <button class="tone-btn active" data-tone="professional">Professional</button>
+        <button class="tone-btn" data-tone="concise">Concise</button>
+        <button class="tone-btn" data-tone="detailed">Detailed</button>
+      </div>
+    </div>
+
+    <!-- LIVE BLOCKED ITEMS -->
+    <div class="panel-section">
+      <div class="panel-title">Blocked items <span class="live-tag">LIVE</span></div>
+      <div id="live-blocked-section">
+        <div class="no-data">Loading from sheet…</div>
+      </div>
+    </div>
+
+    <!-- LIVE IN PROGRESS -->
+    <div class="panel-section">
+      <div class="panel-title">In progress today <span class="live-tag">LIVE</span></div>
+      <div id="live-inprog-section">
+        <div class="no-data">Loading from sheet…</div>
+      </div>
+    </div>
+
+    <!-- MILESTONE STATUS -->
+    <div class="panel-section">
+      <div class="panel-title">Milestones <span class="live-tag">AUTO</span></div>
+      <div class="milestone-pills" id="milestone-pills">
+        <div class="m-pill"><div class="m-pill-dot" style="background:#888"></div><span class="m-pill-label">M1 · Env &amp; data ready (19 Jun)</span><span class="m-pill-status" id="m1-status" style="background:#F6F6F6;color:#888">Pending</span></div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:#888"></div><span class="m-pill-label">M2 · Cycle running clean (26 Jun)</span><span class="m-pill-status" id="m2-status" style="background:#F6F6F6;color:#888">Pending</span></div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:#888"></div><span class="m-pill-label">M3 · Dry run complete (3 Jul)</span><span class="m-pill-status" id="m3-status" style="background:#F6F6F6;color:#888">Pending</span></div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:#888"></div><span class="m-pill-label">M4 · Client handover (7 Jul)</span><span class="m-pill-status" id="m4-status" style="background:#F6F6F6;color:#888">Pending</span></div>
+      </div>
+    </div>
+
+    <!-- EDITABLE HIGHLIGHTS -->
+    <div class="panel-section">
+      <div class="panel-title">Highlights for email</div>
+      <div class="form-group">
+        <label>Accomplished today / this week <span class="auto-tag">AUTO-FILLED</span></label>
+        <textarea id="accomplished" placeholder="Auto-filled from completed tasks. Edit freely…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Blockers / risks <span class="auto-tag">AUTO-FILLED</span></label>
+        <textarea id="blockers" placeholder="Auto-filled from blocked tasks. Add context…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Next steps</label>
+        <textarea id="next-steps" placeholder="e.g. Day 4 — first full end-to-end cycle run…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Additional notes</label>
+        <textarea id="extra-notes" placeholder="Any other context for the CEO…" style="min-height:50px"></textarea>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-title">From / signature</div>
+      <div class="form-group">
+        <label>Your name</label>
+        <input type="text" id="sender-name" value="Purna B"/>
+      </div>
+      <div class="form-group">
+        <label>Your role</label>
+        <input type="text" id="sender-role" value="Project Coordinator — MF RTA Sandbox"/>
+      </div>
+    </div>
+
+    <button class="btn-generate" id="generate-btn">✦ Generate email</button>
+    <button class="btn-clear" id="clear-btn" style="margin-bottom:16px">↺ Reset highlights</button>
+
+    <div class="panel-section">
+      <div class="panel-title">Saved drafts</div>
+      <div class="draft-list" id="draft-list"><div class="no-drafts">No saved drafts yet</div></div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="email-meta" id="email-meta" style="display:none">
+      <div class="meta-row"><span class="meta-label">To</span><span class="meta-value"><input type="text" id="meta-to" value="ganesh.venkatachalam@validusfintech.com"/></span></div>
+      <div class="meta-row"><span class="meta-label">Cc</span><span class="meta-value"><input type="text" id="meta-cc" placeholder="Add CC recipients…"/></span></div>
+      <div class="meta-row"><span class="meta-label">Subject</span><span class="meta-value"><input type="text" id="meta-subject"/></span></div>
+      <div class="meta-row"><span class="meta-label">Date</span><span class="meta-value" id="meta-date" style="color:#888"></span></div>
+    </div>
+    <div class="email-body-wrap">
+      <div class="email-placeholder" id="email-placeholder">
+        <div class="icon">✉️</div>
+        <p>Live task data is pulled from your tracker sheet automatically. Fill in the highlights and click <strong>Generate email</strong>.</p>
+      </div>
+      <div class="email-toolbar" id="email-toolbar" style="display:none">
+        <button class="toolbar-btn" onclick="wrapText('**','**')"><b>B</b></button>
+        <button class="toolbar-btn" onclick="wrapText('_','_')"><i>I</i></button>
+        <div class="toolbar-divider"></div>
+        <button class="toolbar-btn" onclick="insertLine('• ')">• List</button>
+        <button class="toolbar-btn" onclick="insertLine('→ ')">→ Arrow</button>
+        <div class="toolbar-divider"></div>
+        <button class="toolbar-btn" onclick="regenerate()">↺ Regenerate</button>
+        <button class="toolbar-btn" onclick="saveDraft()">💾 Save draft</button>
+      </div>
+      <textarea class="email-textarea" id="email-body" style="display:none" spellcheck="true"></textarea>
+    </div>
+    <div class="action-bar" id="action-bar" style="display:none">
+      <button class="btn-copy-email" id="copy-email-btn">📋 Copy email body</button>
+      <button class="btn-open-mail" id="open-mail-btn">📨 Open in Mail</button>
+      <button class="btn-secondary" id="copy-subject-btn">Copy subject</button>
+      <span class="word-count" id="word-count"></span>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG — same Apps Script as tracker ────────────────────────────────────
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyXSSLV4vO7dh2IyjJp6tcLQA3hipN-QS1L6ELFmD4lZx9oMbPMHtTLBeo9YWSY3hpt/exec";
+
+// ─── MILESTONE TASK ID RANGES ─────────────────────────────────────────────────
+// M1 = Days 1-3, M2 = Days 4-8, M3 = Days 9-13, M4 = Days 14-15
+const M_RANGES = {
+  m1: ["Day 1","Day 2","Day 3"],
+  m2: ["Day 4","Day 5","Day 6","Day 7","Day 8"],
+  m3: ["Day 9","Day 10","Day 11","Day 12","Day 13"],
+  m4: ["Day 14","Day 15"],
+};
+
+const M_INFO = {
+  m1:{label:"M1 — Environment & base data ready",   by:"Fri 19 Jun"},
+  m2:{label:"M2 — Daily cycle running clean",        by:"Fri 26 Jun"},
+  m3:{label:"M3 — Dry run complete",                 by:"Fri 3 Jul"},
+  m4:{label:"M4 — Client handover",                  by:"Tue 7 Jul"},
+};
+
+// ─── DATA SOURCE: localStorage written by the tracker ─────────────────────────
+// The tracker (ValidusSandboxTracker.html) saves all task statuses to
+// localStorage under key "validus_tracker_v2" on the SAME device/browser.
+// The email composer reads that key — no network call needed.
+
+const LS_KEY = "validus_tracker_v2";
+
+// Master task list — mirrors the tracker exactly so we can rebuild full rows
+const RAW_DAYS_EMAIL = [
+  {day:"Day 1",date:"Wed 17 Jun",tasks:[
+    {owner:"Sridhar / Purna",task:"Short kickoff call with everyone. Explain the goal and the plan, agree the 10:00 daily standup, set up the shared tracker and a chat group."},
+    {owner:"Purna",task:"Set up the tracker. Confirm the feed generator runs for MFU, NSE and BSE. Make one sample of each and check the format."},
+    {owner:"Mukesh",task:"Start building the sandbox environment. Bring up the servers and point to a clean non-prod database."},
+    {owner:"Krishna",task:"Work with Mukesh. Deploy the latest back-office build, set up the database, take a backup point."},
+    {owner:"Maqsood",task:"Write down the exact cycle we want to show, step by step. One page."},
+    {owner:"Manmohan",task:"Start the scheme master list. Decide schemes, plans, options and the business rules. Share a draft by end of day."},
+    {owner:"Nimma",task:"Look at the back-office tables and the existing synthetic data. List which tables we need to seed for investors and folios."},
+    {owner:"Praneeth",task:"List every login we will need and the access each one needs."},
+    {owner:"Soumya",task:"Start a simple checklist of what good looks like at each step. Nivedita and Ruchita: read the plan and be ready."},
+  ]},
+  {day:"Day 2",date:"Thu 18 Jun",tasks:[
+    {owner:"Mukesh",task:"Finish the environment. Confirm the app is up and all services are running. Share the URL and a test login."},
+    {owner:"Krishna",task:"Sort out any deployment or database issues with Mukesh. Keep a clean backup."},
+    {owner:"Maqsood",task:"Finalise the scheme master and rules with Manmohan. Hand it over for entry."},
+    {owner:"Manmohan",task:"Lock the scheme master and rules. Get ready to enter them in the system."},
+    {owner:"Nimma",task:"Write the seed scripts for the base investors and folios. Keep them ready, do not run yet."},
+    {owner:"Purna",task:"Generate a first proper set of feed files for one cycle, in all three formats."},
+    {owner:"Praneeth",task:"Start creating the logins and roles in the sandbox, with Mukesh on config."},
+    {owner:"Soumya",task:"Finish the QC checklist for each step."},
+  ]},
+  {day:"Day 3",date:"Fri 19 Jun",tasks:[
+    {owner:"Manmohan",task:"Enter the scheme master, plans, options and rules. Maqsood checks them."},
+    {owner:"Nimma",task:"Run the investor and folio seed scripts. Share the counts. Fix any gaps."},
+    {owner:"Mukesh",task:"Support any config needed for the schemes and rules."},
+    {owner:"Praneeth",task:"Finish the logins and access. Share the credential list with the team."},
+    {owner:"Purna",task:"Keep the feed files ready, update the tracker, note anything still pending."},
+    {owner:"Soumya",task:"Check the schemes and folios are there and look right."},
+  ]},
+  {day:"Day 4",date:"Mon 22 Jun",tasks:[
+    {owner:"Nimma",task:"Top up investors and folios for a good spread (single, joint, minor, NRI, HUF, corporate)."},
+    {owner:"Manmohan",task:"Register the SIPs. Set up demo SIPs with first installment dated 7 July."},
+    {owner:"Purna",task:"Drop the day's feed files (MFU, NSE, BSE) and prepare the synthetic bank credit file for recon."},
+    {owner:"Manmohan",task:"Capture the day's physical onboarding and transactions as maker."},
+    {owner:"Maqsood",task:"Run the full cycle end to end. Note exactly where it stops."},
+    {owner:"Nimma",task:"Generate the registers and a short daily summary."},
+    {owner:"Soumya",task:"QC each step and write down what broke."},
+  ]},
+  {day:"Day 5",date:"Tue 23 Jun",tasks:[
+    {owner:"Mukesh / Nivedita / Ruchita",task:"First thing, clear the issues logged on Day 4. Maqsood re-tests."},
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Manmohan",task:"Physical onboarding and transactions as maker."},
+    {owner:"Maqsood",task:"Run the full cycle again, entry to UCR."},
+    {owner:"Nimma",task:"Registers and the recon input file."},
+    {owner:"Soumya",task:"QC. Confirm yesterday's breaks are actually fixed."},
+  ]},
+  {day:"Day 6",date:"Wed 24 Jun",tasks:[
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Maqsood",task:"Run the full cycle. Include redemptions and switches. Check exit load works."},
+    {owner:"Manmohan",task:"Rehearse a SIP installment falling due in today's cycle."},
+    {owner:"Nimma",task:"Registers, including the SIP register."},
+    {owner:"Soumya",task:"QC. Devs fix any issues same day."},
+  ]},
+  {day:"Day 7",date:"Thu 25 Jun",tasks:[
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Maqsood / Soumya",task:"Put in exception cases — rejected feed record, short credit, NIGO application."},
+    {owner:"Maqsood",task:"Run the full cycle, entry to UCR."},
+    {owner:"Manmohan",task:"Confirm the maker / checker rejections behave correctly."},
+    {owner:"Nimma",task:"Exception and rejection registers."},
+  ]},
+  {day:"Day 8",date:"Fri 26 Jun",tasks:[
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Maqsood",task:"Run the full cycle clean, entry to UCR, no manual workarounds."},
+    {owner:"Manmohan",task:"Shadow Maqsood on batch close and UCR, and run part of it himself."},
+    {owner:"Nimma",task:"Take a full set of registers as reference."},
+    {owner:"Soumya",task:"QC sign-off for the week."},
+    {owner:"Purna",task:"Confirm the daily routine is repeatable. Update the tracker."},
+  ]},
+  {day:"Day 9",date:"Mon 29 Jun",tasks:[
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Maqsood / Manmohan",task:"Run the full cycle, then walk through the exact demo sequence once in order."},
+    {owner:"Nimma",task:"Registers and daily summary."},
+    {owner:"Soumya",task:"QC. Praneeth notes anything awkward in the demo flow."},
+  ]},
+  {day:"Day 10",date:"Tue 30 Jun",tasks:[
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Manmohan",task:"Make sure a SIP installment falls due today. Confirm demo SIPs still pending for 7 July."},
+    {owner:"Maqsood",task:"Run the full cycle."},
+    {owner:"Nimma",task:"Registers."},
+    {owner:"Soumya",task:"QC."},
+  ]},
+  {day:"Day 11",date:"Wed 1 Jul",tasks:[
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Maqsood",task:"Run the full cycle."},
+    {owner:"Nimma",task:"Take a full reference set of registers and reports."},
+    {owner:"Purna",task:"Note the exact folios, investors and SIPs we will use in the live demo."},
+    {owner:"Soumya",task:"QC."},
+  ]},
+  {day:"Day 12",date:"Thu 2 Jul",tasks:[
+    {owner:"Purna",task:"Drop the day's feed files."},
+    {owner:"Maqsood",task:"Run a clean cycle. Confirm nothing is left pending in the queues."},
+    {owner:"Maqsood / Manmohan",task:"Re-confirm the demo SIPs are dated for the 7th."},
+    {owner:"Nimma",task:"Final reference registers."},
+    {owner:"Mukesh / Krishna",task:"Get ready to freeze the environment after the dry run."},
+  ]},
+  {day:"Day 13",date:"Fri 3 Jul",tasks:[
+    {owner:"Maqsood / Manmohan",task:"Run the whole thing as if the client is watching, following the demo script."},
+    {owner:"Praneeth",task:"Coordinate the dry run, keep time, note the rough spots."},
+    {owner:"Soumya",task:"Watch for anything off and log it."},
+    {owner:"Nivedita / Ruchita",task:"On standby for any last fix."},
+    {owner:"Purna",task:"Write up what to fix before handover."},
+  ]},
+  {day:"Day 14",date:"Mon 6 Jul",tasks:[
+    {owner:"Nivedita / Ruchita / Mukesh",task:"Clear anything left from the dry run."},
+    {owner:"Mukesh / Krishna",task:"Freeze the environment. Take a backup."},
+    {owner:"Praneeth",task:"Set up the client's view-only login and test it."},
+    {owner:"Maqsood",task:"Reset the demo data to a clean starting point, but keep the pending SIPs."},
+    {owner:"Nimma",task:"Final check that all registers and reports generate cleanly. Soumya: final QC pass."},
+    {owner:"Purna",task:"Prepare the handover note — URL, logins, what to click. Update the tracker."},
+  ]},
+  {day:"Day 15",date:"Tue 7 Jul",tasks:[
+    {owner:"Mukesh / Maqsood",task:"Morning smoke test. Log in, run a quick check, confirm everything is up."},
+    {owner:"Sridhar / Praneeth",task:"Hand over the sandbox access and the short guide to the client."},
+    {owner:"Whole team",task:"On standby through the day for any first-use issues."},
+  ]},
+];
+
+function buildTasksFromMaster(){
+  const rows=[];
+  RAW_DAYS_EMAIL.forEach(d=>d.tasks.forEach((t,i)=>rows.push({
+    id:`${d.day}-${i}`, day:d.day, date:d.date,
+    owner:t.owner, task:t.task, status:"Not started", note:""
+  })));
+  return rows;
+}
+
+async function fetchData(){
+  setSyncState("loading","Reading tracker data…");
+  // Try localStorage first (works when both files open in same browser)
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){
+      const saved = JSON.parse(raw);
+      const rows  = buildTasksFromMaster();
+      rows.forEach(r=>{ if(saved[r.id]){ r.status=saved[r.id].status||"Not started"; r.note=saved[r.id].note||""; } });
+      liveData = rows;
+      processData();
+      hideManualEntry();
+      const done=rows.filter(r=>r.status==="Completed").length;
+      setSyncState("ok","✓ Loaded from tracker · "+done+" tasks completed · "+today());
+      return;
+    }
+  }catch(e){ console.warn("localStorage read failed:",e); }
+
+  // No tracker data found — show manual entry immediately, no hanging
+  setSyncState("error","Tracker data not found on this browser. Use the manual entry below.");
+  showManualEntry();
+}
+
+function showManualEntry(){
+  const b=document.getElementById("manual-entry-banner");
+  b.style.display="flex";
+  // Pre-fill stats bar with zeros so email can still be generated
+  document.getElementById("s-done").textContent="0";
+  document.getElementById("s-total").textContent="75";
+  document.getElementById("s-pct").textContent="0%";
+  document.getElementById("s-blocked").textContent="0";
+  document.getElementById("s-inprog").textContent="0";
+  const pill=document.getElementById("on-track-pill");
+  pill.className="on-track-pill pill-amber";pill.textContent="⚠ Enter figures below";
+  document.getElementById("live-blocked-section").innerHTML='<div class="no-data">Enter blocked count and details in the fields below.</div>';
+  document.getElementById("live-inprog-section").innerHTML='<div class="no-data">Enter in-progress count below.</div>';
+}
+function hideManualEntry(){ document.getElementById("manual-entry-banner").style.display="none"; }
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let liveData    = [];   // all rows from sheet
+let emailType   = "daily";
+let tone        = "professional";
+let drafts      = JSON.parse(localStorage.getItem("ceo_email_drafts_v2")||"[]");
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function toast(msg){
+  const el=document.getElementById("toast");
+  el.textContent=msg;el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),2200);
+}
+function today(){
+  return new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+}
+function todayShort(){
+  return new Date().toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+}
+function getDayLabel(){
+  // Estimate based on date
+  const days=["Day 1","Day 2","Day 3","Day 4","Day 5","Day 6","Day 7","Day 8","Day 9","Day 10","Day 11","Day 12","Day 13","Day 14","Day 15"];
+  const dates=["17 Jun","18 Jun","19 Jun","22 Jun","23 Jun","24 Jun","25 Jun","26 Jun","29 Jun","30 Jun","1 Jul","2 Jul","3 Jul","6 Jul","7 Jul"];
+  const now=new Date();
+  const todayD=now.getDate();
+  const todayM=now.getMonth()+1;
+  const idx=dates.findIndex(d=>{
+    const parts=d.split(" ");
+    const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return parseInt(parts[0])===todayD&&months.indexOf(parts[1])===todayM-1;
+  });
+  return idx>=0?days[idx]:"Current day";
+}
+
+// ─── FETCH FROM APPS SCRIPT ───────────────────────────────────────────────────
+
+
+function setSyncState(state, msg){
+  const dot=document.getElementById("sync-dot");
+  const msgEl=document.getElementById("sync-msg");
+  dot.className="sync-dot"+(state==="loading"?" loading":state==="error"?" error":"");
+  msgEl.textContent=msg;
+}
+
+// ─── PROCESS LIVE DATA ────────────────────────────────────────────────────────
+function processData(){
+  if(!liveData.length) return;
+
+  // Normalise all rows — ensure every field has a safe string value
+  liveData = liveData.map(r=>({
+    id:     String(r.id||""),
+    day:    String(r.day||""),
+    date:   String(r.date||""),
+    owner:  String(r.owner||""),
+    task:   String(r.task||""),
+    status: String(r.status||"Not started"),
+    note:   String(r.note||""),
+  })).filter(r=>r.id&&r.day);
+
+  const done    = liveData.filter(r=>r.status==="Completed").length;
+  const blocked = liveData.filter(r=>r.status==="Blocked").length;
+  const inprog  = liveData.filter(r=>r.status==="In progress").length;
+  const total   = liveData.length;
+  const pct     = Math.round((done/total)*100);
+
+  // Update stats bar
+  document.getElementById("s-done").textContent    = done;
+  document.getElementById("s-total").textContent   = total;
+  document.getElementById("s-pct").textContent     = pct+"%";
+  document.getElementById("s-blocked").textContent = blocked;
+  document.getElementById("s-inprog").textContent  = inprog;
+
+  // On-track pill
+  const pill=document.getElementById("on-track-pill");
+  if(blocked===0&&pct>=Math.round((getDayNumber()/15)*100)-10){
+    pill.className="on-track-pill pill-green";pill.textContent="✅ On track";
+  } else if(blocked>0||pct<Math.round((getDayNumber()/15)*100)-20){
+    pill.className="on-track-pill pill-red";pill.textContent="🔴 At risk";
+  } else {
+    pill.className="on-track-pill pill-amber";pill.textContent="⚠ Needs attention";
+  }
+
+  // Blocked items panel
+  const blockedRows=liveData.filter(r=>r.status==="Blocked");
+  const blockedEl=document.getElementById("live-blocked-section");
+  if(blockedRows.length===0){
+    blockedEl.innerHTML=`<div class="no-data">No blocked items ✓</div>`;
+  } else {
+    blockedEl.innerHTML=`<div class="live-section"><div class="live-section-title">⚠ ${blockedRows.length} blocked item(s)</div>`+
+      blockedRows.map(r=>`<div class="live-item"><div class="live-item-dot" style="background:#A32D2D"></div><div><strong>${r.owner}</strong> · ${r.day}<br>${r.task.slice(0,80)}${r.task.length>80?"…":""}${r.note?`<br><em style="color:#888">Note: ${r.note}</em>`:""}</div></div>`).join("")+
+      `</div>`;
+  }
+
+  // In progress panel
+  const inprogRows=liveData.filter(r=>r.status==="In progress");
+  const inprogEl=document.getElementById("live-inprog-section");
+  if(inprogRows.length===0){
+    inprogEl.innerHTML=`<div class="no-data">No tasks in progress</div>`;
+  } else {
+    inprogEl.innerHTML=`<div class="live-section" style="background:#FFFDF0;border-color:#FAC775"><div class="live-section-title" style="color:#854F0B">◑ ${inprogRows.length} task(s) in progress</div>`+
+      inprogRows.slice(0,5).map(r=>`<div class="live-item"><div class="live-item-dot" style="background:#854F0B"></div><div><strong>${r.owner}</strong> · ${r.day}<br>${r.task.slice(0,70)}${r.task.length>70?"…":""}</div></div>`).join("")+
+      (inprogRows.length>5?`<div style="font-size:10px;color:#aaa;margin-top:4px">+${inprogRows.length-5} more…</div>`:"")+
+      `</div>`;
+  }
+
+  // Milestone auto-calculation
+  Object.entries(M_RANGES).forEach(([mk,days])=>{
+    const mTasks=liveData.filter(r=>days.includes(r.day));
+    const mDone=mTasks.filter(r=>r.status==="Completed").length;
+    const mBlocked=mTasks.filter(r=>r.status==="Blocked").length;
+    const mPct=mTasks.length>0?Math.round((mDone/mTasks.length)*100):0;
+    const el=document.getElementById(`${mk}-status`);
+    const dot=el?.closest(".m-pill")?.querySelector(".m-pill-dot");
+    let status,bg,c;
+    if(mPct===100){status="✓ Done";bg="#EDFBF3";c="#0F6E56";}
+    else if(mBlocked>0){status="⚠ At risk";bg="#FFF0F0";c="#A32D2D";}
+    else if(mPct>0){status=`${mPct}% done`;bg="#FFFBEC";c="#854F0B";}
+    else{status="Pending";bg="#F6F6F6";c="#888";}
+    if(el){el.textContent=status;el.style.background=bg;el.style.color=c;}
+    if(dot) dot.style.background=c;
+  });
+
+  // Auto-fill accomplished textarea
+  const completedRows=liveData.filter(r=>r.status==="Completed");
+  if(completedRows.length>0&&!document.getElementById("accomplished").dataset.edited){
+    const recent=completedRows.slice(-5);
+    const text=recent.map(r=>`• ${r.owner} — ${r.task.slice(0,80)}${r.task.length>80?"…":""}`).join("\n");
+    document.getElementById("accomplished").value=text;
+    document.getElementById("accomplished").classList.add("auto-filled");
+  }
+
+  // Auto-fill blockers textarea
+  if(blockedRows.length>0&&!document.getElementById("blockers").dataset.edited){
+    const text=blockedRows.map(r=>`• ${r.owner} (${r.day}): ${r.task.slice(0,70)}${r.task.length>70?"…":""}${r.note?` — ${r.note}`:""}`).join("\n");
+    document.getElementById("blockers").value=text;
+    document.getElementById("blockers").classList.add("auto-filled");
+  } else if(blockedRows.length===0&&!document.getElementById("blockers").dataset.edited){
+    document.getElementById("blockers").value="No blockers at this time.";
+    document.getElementById("blockers").classList.add("auto-filled");
+  }
+}
+
+function getDayNumber(){
+  const dates=["17/6","18/6","19/6","22/6","23/6","24/6","25/6","26/6","29/6","30/6","1/7","2/7","3/7","6/7","7/7"];
+  const now=new Date();
+  const key=`${now.getDate()}/${now.getMonth()+1}`;
+  const idx=dates.indexOf(key);
+  return idx>=0?idx+1:1;
+}
+
+// ─── EMAIL GENERATION ────────────────────────────────────────────────────────
+function getMilestoneStatusText(){
+  return Object.entries(M_INFO).map(([mk,m])=>{
+    const el=document.getElementById(`${mk}-status`);
+    const s=el?el.textContent:"Pending";
+    const icon=s.includes("Done")?"✓":s.includes("risk")?"⚠":"○";
+    return `${icon}  ${m.label.padEnd(40)} Target: ${m.by}`;
+  }).join("\n");
+}
+
+function getOnTrackText(){
+  const pill=document.getElementById("on-track-pill");
+  if(pill.classList.contains("pill-green")) return "on track for the 7 July handover";
+  if(pill.classList.contains("pill-red")) return "at risk and requires attention";
+  return "progressing with some items needing attention";
+}
+
+function generateEmail(){
+  const done       = parseInt(document.getElementById("s-done").textContent)||0;
+  const total      = parseInt(document.getElementById("s-total").textContent)||75;
+  const blocked    = parseInt(document.getElementById("s-blocked").textContent)||0;
+  const inprog     = parseInt(document.getElementById("s-inprog").textContent)||0;
+  const pct        = document.getElementById("s-pct").textContent||"0%";
+  const accomplished = document.getElementById("accomplished").value.trim();
+  const blockerText  = document.getElementById("blockers").value.trim();
+  const nextSteps    = document.getElementById("next-steps").value.trim();
+  const extraNotes   = document.getElementById("extra-notes").value.trim();
+  const senderName   = document.getElementById("sender-name").value.trim()||"Purna B";
+  const senderRole   = document.getElementById("sender-role").value.trim()||"Project Coordinator";
+  const onTrack      = getOnTrackText();
+  const dayLabel     = getDayLabel();
+  const todayStr     = today();
+  const mStatus      = getMilestoneStatusText();
+
+  const greeting = `Dear Ganesh,`;
+  const sign     = `\nWarm regards,\n${senderName}\n${senderRole}\nValidus Fintech Services Pvt. Ltd.`;
+  const sep      = "─".repeat(50);
+
+  let subject="", body="";
+
+  if(emailType==="daily"){
+    subject=`MF RTA Sandbox — Daily Update | ${dayLabel} | ${todayShort()}`;
+    body=`${greeting}
+
+Please find below the daily status update for the MF RTA Sandbox Setup project as of ${todayStr} (${dayLabel}).
+
+${sep}
+OVERALL PROGRESS
+${sep}
+Tasks completed  : ${done} of ${total} (${pct})
+In progress      : ${inprog}
+Blocked items    : ${blocked}
+Project status   : The project is ${onTrack}.
+Target handover  : Tuesday, 7 July 2026
+`;
+    if(accomplished) body+=`\n${sep}\nACCOMPLISHED TODAY\n${sep}\n${accomplished}\n`;
+    if(blockerText)  body+=`\n${sep}\nBLOCKERS / RISKS\n${sep}\n${blockerText}\n`;
+    if(nextSteps)    body+=`\n${sep}\nNEXT STEPS (${getNextDay(dayLabel)})\n${sep}\n${nextSteps}\n`;
+    body+=`\n${sep}\nMILESTONE STATUS\n${sep}\n${mStatus}\n`;
+    if(extraNotes)   body+=`\n${sep}\nADDITIONAL NOTES\n${sep}\n${extraNotes}\n`;
+
+  } else if(emailType==="weekly"){
+    subject=`MF RTA Sandbox — Weekly Progress Report | W/E ${todayShort()}`;
+    body=`${greeting}
+
+Please find the weekly progress summary for the MF RTA Sandbox Setup project for the week ending ${todayStr}.
+
+${sep}
+WEEK IN REVIEW
+${sep}
+Overall progress : ${done} of ${total} tasks completed (${pct})
+In progress      : ${inprog}
+Blocked items    : ${blocked}
+Project status   : The project is ${onTrack}.
+Handover target  : Tuesday, 7 July 2026
+`;
+    if(accomplished) body+=`\n${sep}\nKEY ACCOMPLISHMENTS THIS WEEK\n${sep}\n${accomplished}\n`;
+    if(blockerText)  body+=`\n${sep}\nCHALLENGES & MITIGATIONS\n${sep}\n${blockerText}\n`;
+    body+=`\n${sep}\nMILESTONE STATUS\n${sep}\n${mStatus}\n`;
+    if(nextSteps)    body+=`\n${sep}\nFOCUS AREAS FOR NEXT WEEK\n${sep}\n${nextSteps}\n`;
+    if(extraNotes)   body+=`\n${sep}\nADDITIONAL NOTES\n${sep}\n${extraNotes}\n`;
+
+  } else if(emailType==="milestone"){
+    subject=`MF RTA Sandbox — Milestone Achieved ✓ | ${todayShort()}`;
+    body=`${greeting}
+
+I am pleased to inform you that the team has successfully achieved a key milestone in the MF RTA Sandbox Setup project.
+
+${sep}
+MILESTONE STATUS
+${sep}
+${mStatus}
+
+${sep}
+OVERALL PROJECT HEALTH
+${sep}
+Tasks completed  : ${done} of ${total} (${pct})
+Project status   : ${onTrack.charAt(0).toUpperCase()+onTrack.slice(1)}.
+Handover target  : Tuesday, 7 July 2026
+`;
+    if(accomplished) body+=`\n${sep}\nWHAT WAS DELIVERED\n${sep}\n${accomplished}\n`;
+    if(nextSteps)    body+=`\n${sep}\nNEXT MILESTONE\n${sep}\n${nextSteps}\n`;
+    if(extraNotes)   body+=`\n${extraNotes}\n`;
+
+  } else if(emailType==="blocker"){
+    subject=`MF RTA Sandbox — Blocker Alert | Action Required | ${todayShort()}`;
+    body=`${greeting}
+
+I am writing to bring to your attention ${blocked>1?`${blocked} blockers`:"a blocker"} in the MF RTA Sandbox Setup project that ${blocked>1?"require":"requires"} immediate attention.
+
+${sep}
+BLOCKER DETAILS
+${sep}
+${blockerText||"[Please describe the blocker]"}
+
+${sep}
+PROJECT STATUS
+${sep}
+Tasks completed  : ${done} of ${total} (${pct})
+Open blockers    : ${blocked}
+Impact           : ${getOnTrackText().includes("risk")?"This is affecting the project timeline":"Contained — project remains on track subject to resolution"}
+Handover target  : Tuesday, 7 July 2026
+`;
+    if(nextSteps) body+=`\n${sep}\nPROPOSED RESOLUTION\n${sep}\n${nextSteps}\n`;
+    if(extraNotes) body+=`\n${extraNotes}\n`;
+    body+=`\nI will keep you updated as this progresses.\n`;
+
+  } else if(emailType==="handover"){
+    subject=`MF RTA Sandbox — Handover Ready | Client Access Prepared | 7 Jul 2026`;
+    body=`${greeting}
+
+I am pleased to confirm that the MF RTA Sandbox Setup is complete and ready for client handover as planned on Tuesday, 7 July 2026.
+
+${sep}
+HANDOVER SUMMARY
+${sep}
+Tasks completed    : ${done} of ${total} (${pct})
+Environment status : Frozen and verified
+Client access      : Configured and tested
+Handover date      : Tuesday, 7 July 2026
+
+${sep}
+MILESTONE STATUS
+${sep}
+${mStatus}
+`;
+    if(accomplished) body+=`\n${sep}\nWHAT HAS BEEN DELIVERED\n${sep}\n${accomplished}\n`;
+    if(nextSteps)    body+=`\n${sep}\nIMMEDIATE NEXT STEPS\n${sep}\n${nextSteps}\n`;
+    if(extraNotes)   body+=`\n${extraNotes}\n`;
+    body+=`\nThank you for your continued support throughout this engagement.\n`;
+
+  } else {
+    subject=`MF RTA Sandbox — Update | ${todayShort()}`;
+    body=`${greeting}\n\n`;
+    if(accomplished) body+=`${accomplished}\n\n`;
+    body+=`Overall progress: ${done} of ${total} tasks completed (${pct}). The project is ${onTrack}.\n`;
+    if(blockerText) body+=`\nBlockers: ${blockerText}\n`;
+    if(nextSteps)   body+=`\nNext steps: ${nextSteps}\n`;
+    if(extraNotes)  body+=`\n${extraNotes}\n`;
+  }
+
+  // Apply tone BEFORE adding sign-off
+  // Each tone rebuilds the email differently — not just word substitution
+
+  if(tone==="concise"){
+    // Strip section headers, compress to bullet points
+    let lines=[];
+    lines.push(`${greeting}`);
+    lines.push("");
+    lines.push(`${dayLabel} update — ${todayStr}`);
+    lines.push(`Progress: ${done}/${total} tasks done (${pct}) · Blocked: ${blocked} · ${getOnTrackText().includes("on track")?"On track ✅":"Needs attention ⚠"}`);
+    lines.push("");
+    if(accomplished){
+      lines.push("Done:");
+      accomplished.split("\n").forEach(l=>{if(l.trim()) lines.push(l.trim().startsWith("•")?l.trim():"• "+l.trim());});
+      lines.push("");
+    }
+    if(blockerText&&blockerText!=="No blockers at this time."){
+      lines.push("Blockers:");
+      blockerText.split("\n").forEach(l=>{if(l.trim()) lines.push(l.trim().startsWith("•")?l.trim():"• "+l.trim());});
+      lines.push("");
+    }
+    if(nextSteps){
+      lines.push("Next:");
+      nextSteps.split("\n").forEach(l=>{if(l.trim()) lines.push(l.trim().startsWith("•")?l.trim():"• "+l.trim());});
+      lines.push("");
+    }
+    // Milestone one-liner
+    const mDone=Object.entries(M_INFO).filter(([mk])=>{
+      const el=document.getElementById(mk+"-status");
+      return el&&el.textContent.includes("Done");
+    }).map(([,m])=>m.label.replace(/M[0-9] — /,""));
+    if(mDone.length) lines.push("Milestones cleared: "+mDone.join(", "));
+    if(extraNotes) lines.push("\nNote: "+extraNotes);
+    body=lines.join("\n");
+
+  } else if(tone==="detailed"){
+    // Full narrative paragraphs, no bullet points, flowing prose
+    let paras=[];
+    paras.push(greeting);
+    paras.push("");
+
+    if(emailType==="daily"){
+      paras.push(`I am writing to provide you with a comprehensive update on the MF RTA Sandbox Setup project as of ${todayStr}. We are currently on ${dayLabel} of the 15-day engagement, with a target client handover on Tuesday, 7 July 2026.`);
+      paras.push(`As of today, the team has completed ${done} out of ${total} tasks, representing ${pct} of the overall scope. There ${inprog===1?"is":"are"} currently ${inprog} task${inprog===1?"":"s"} in progress and ${blocked} item${blocked===1?"":"s"} flagged as blocked. Overall, the project is ${getOnTrackText()}.`);
+      if(accomplished){
+        paras.push(`In terms of progress made today, the following has been accomplished:`);
+        paras.push(accomplished.split("\n").filter(l=>l.trim()).map(l=>"    "+l.trim().replace(/^•\s*/,"")).join("\n"));
+      }
+      if(blockerText&&blockerText!=="No blockers at this time."){
+        paras.push(`With respect to risks and blockers, the following items require attention:`);
+        paras.push(blockerText.split("\n").filter(l=>l.trim()).map(l=>"    "+l.trim().replace(/^•\s*/,"")).join("\n"));
+      } else {
+        paras.push(`I am pleased to report that there are no blockers at this time and the team is progressing smoothly through the planned activities.`);
+      }
+      if(nextSteps){
+        paras.push(`Looking ahead, the focus for the next working day will be as follows:`);
+        paras.push(nextSteps.split("\n").filter(l=>l.trim()).map(l=>"    "+l.trim().replace(/^•\s*/,"")).join("\n"));
+      }
+      // Full milestone narrative
+      paras.push(`On the milestone front, the current status is as follows. ${Object.entries(M_INFO).map(([mk,m])=>{
+        const el=document.getElementById(mk+"-status");
+        const s=el?el.textContent:"Pending";
+        return m.label+(s.includes("Done")?" has been successfully completed"
+          :s.includes("risk")?" is currently at risk and is being closely monitored"
+          :s.includes("%")?" is "+s+" complete"
+          :" is pending and scheduled for completion by "+m.by);
+      }).join(". ")+"."`);
+      if(extraNotes) paras.push(`By way of additional context, ${extraNotes}`);
+      paras.push(`I will continue to provide daily updates and will flag any material developments as they arise. Please do not hesitate to reach out should you require any further information.`);
+    } else {
+      // For non-daily types in detailed mode, use the standard body already built but add narrative intro
+      paras.push(`I am writing to provide you with a detailed account of the current status of the MF RTA Sandbox Setup project as of ${todayStr}.`);
+      paras.push(`The project has progressed to ${pct} completion, with ${done} of ${total} tasks marked as complete. ${blocked>0?"There are "+blocked+" item(s) currently blocked, details of which are provided below.":"There are no items currently blocked."}`);
+      if(accomplished) paras.push(`The following has been accomplished:\n`+accomplished);
+      if(blockerText&&blockerText!=="No blockers at this time.") paras.push(`The following blockers have been identified:\n`+blockerText);
+      if(nextSteps) paras.push(`The planned next steps are:\n`+nextSteps);
+      paras.push(getMilestoneStatusText());
+      if(extraNotes) paras.push(extraNotes);
+      paras.push(`I remain available to discuss any of the above points at your convenience.`);
+    }
+    body=paras.join("\n\n");
+  }
+  // "professional" tone keeps the structured format already built above — no changes needed
+
+  body+="\n\n"+sign.trim();
+  return{subject,body};
+}
+
+function getNextDay(current){
+  const n=parseInt(current.replace(/[^0-9]/g,""))||1;
+  return `Day ${Math.min(n+1,15)}`;
+}
+
+// ─── RENDER EMAIL ─────────────────────────────────────────────────────────────
+function renderEmail(){
+  const{subject,body}=generateEmail();
+  document.getElementById("email-placeholder").style.display="none";
+  document.getElementById("email-toolbar").style.display="flex";
+  document.getElementById("email-body").style.display="block";
+  document.getElementById("email-meta").style.display="block";
+  document.getElementById("action-bar").style.display="flex";
+  document.getElementById("meta-subject").value=subject;
+  document.getElementById("meta-date").textContent=today();
+  document.getElementById("email-body").value=body;
+  updateWordCount();
+}
+
+function updateWordCount(){
+  const b=document.getElementById("email-body");
+  if(!b||b.style.display==="none") return;
+  const w=b.value.trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById("word-count").textContent=`${w} words`;
+}
+
+function regenerate(){renderEmail();toast("Email regenerated");}
+
+function wrapText(b,a){
+  const ta=document.getElementById("email-body");
+  const s=ta.selectionStart,e=ta.selectionEnd,sel=ta.value.substring(s,e);
+  ta.value=ta.value.substring(0,s)+b+sel+a+ta.value.substring(e);
+  ta.selectionStart=s+b.length;ta.selectionEnd=e+b.length;ta.focus();
+}
+function insertLine(p){
+  const ta=document.getElementById("email-body");
+  const s=ta.selectionStart,ls=ta.value.lastIndexOf("\n",s-1)+1;
+  ta.value=ta.value.substring(0,ls)+p+ta.value.substring(ls);
+  ta.focus();
+}
+
+// ─── DRAFTS ──────────────────────────────────────────────────────────────────
+function saveDraft(){
+  const subject=document.getElementById("meta-subject")?.value||"Draft";
+  const body=document.getElementById("email-body")?.value||"";
+  if(!body.trim()){toast("Nothing to save");return;}
+  drafts.unshift({id:Date.now(),subject,body,type:emailType,date:today()});
+  if(drafts.length>10) drafts=drafts.slice(0,10);
+  localStorage.setItem("ceo_email_drafts_v2",JSON.stringify(drafts));
+  renderDrafts();toast("Draft saved");
+}
+function loadDraft(id){
+  const d=drafts.find(x=>x.id===id);if(!d)return;
+  document.getElementById("email-placeholder").style.display="none";
+  document.getElementById("email-toolbar").style.display="flex";
+  document.getElementById("email-body").style.display="block";
+  document.getElementById("email-meta").style.display="block";
+  document.getElementById("action-bar").style.display="flex";
+  document.getElementById("meta-subject").value=d.subject;
+  document.getElementById("meta-date").textContent=d.date;
+  document.getElementById("email-body").value=d.body;
+  updateWordCount();toast("Draft loaded");
+}
+function deleteDraft(id){
+  drafts=drafts.filter(x=>x.id!==id);
+  localStorage.setItem("ceo_email_drafts_v2",JSON.stringify(drafts));
+  renderDrafts();toast("Draft deleted");
+}
+function renderDrafts(){
+  const el=document.getElementById("draft-list");
+  if(!drafts.length){el.innerHTML='<div class="no-drafts">No saved drafts yet</div>';return;}
+  el.innerHTML=drafts.map(d=>`<div class="draft-item">
+    <div class="draft-item-title">${d.subject.slice(0,44)}${d.subject.length>44?"…":""}</div>
+    <div class="draft-item-meta">${d.date} · ${d.type}</div>
+    <div class="draft-item-actions">
+      <button class="draft-action-btn" onclick="loadDraft(${d.id})">Load</button>
+      <button class="draft-action-btn" onclick="deleteDraft(${d.id})" style="color:#A32D2D">Delete</button>
+    </div></div>`).join("");
+}
+
+// ─── MANUAL FALLBACK ─────────────────────────────────────────────────────────
+function applyManual(){
+  const done    = parseInt(document.getElementById("manual-done").value)||0;
+  const total   = parseInt(document.getElementById("manual-total").value)||75;
+  const blocked = parseInt(document.getElementById("manual-blocked").value)||0;
+  const inprog  = parseInt(document.getElementById("manual-inprog").value)||0;
+  const pct     = Math.round((done/total)*100);
+  document.getElementById("s-done").textContent    = done;
+  document.getElementById("s-total").textContent   = total;
+  document.getElementById("s-pct").textContent     = pct+"%";
+  document.getElementById("s-blocked").textContent = blocked;
+  document.getElementById("s-inprog").textContent  = inprog;
+  const pill = document.getElementById("on-track-pill");
+  if(blocked===0&&pct>=(Math.round((getDayNumber()/15)*100)-10)){
+    pill.className="on-track-pill pill-green";pill.textContent="✅ On track";
+  } else if(blocked>0){
+    pill.className="on-track-pill pill-red";pill.textContent="🔴 At risk";
+  } else {
+    pill.className="on-track-pill pill-amber";pill.textContent="⚠ Needs attention";
+  }
+  document.getElementById("live-blocked-section").innerHTML=
+    blocked>0?`<div class="no-data">Enter blocker details in the Blockers field below.</div>`
+             :`<div class="no-data">No blocked items ✓</div>`;
+  document.getElementById("live-inprog-section").innerHTML=
+    `<div class="no-data">${inprog} task(s) in progress — add details in highlights below.</div>`;
+  setSyncState("ok","Manual figures applied — sheet sync pending");
+  toast("Figures applied — fill in highlights and generate email");
+}
+
+// ─── EVENTS ───────────────────────────────────────────────────────────────────
+document.querySelectorAll(".type-btn").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".type-btn").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");emailType=b.dataset.type;
+}));
+document.querySelectorAll(".tone-btn").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".tone-btn").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");tone=b.dataset.tone;
+}));
+
+// Mark textareas as manually edited so auto-fill doesn't overwrite
+["accomplished","blockers"].forEach(id=>{
+  document.getElementById(id).addEventListener("input",function(){
+    this.dataset.edited="true";
+    this.classList.remove("auto-filled");
+  });
+});
+
+document.getElementById("generate-btn").addEventListener("click",()=>{
+  const btn=document.getElementById("generate-btn");
+  btn.disabled=true;btn.textContent="Generating…";
+  setTimeout(()=>{renderEmail();btn.disabled=false;btn.textContent="✦ Generate email";toast("Email generated");},200);
+});
+
+document.getElementById("clear-btn").addEventListener("click",()=>{
+  ["accomplished","blockers","next-steps","extra-notes"].forEach(id=>{
+    const el=document.getElementById(id);
+    el.value="";delete el.dataset.edited;el.classList.remove("auto-filled");
+  });
+  // Re-run auto-fill
+  if(liveData.length) processData();
+  toast("Highlights reset");
+});
+
+document.getElementById("refresh-btn").addEventListener("click",fetchData);
+document.getElementById("email-body").addEventListener("input",updateWordCount);
+document.getElementById("copy-email-btn").addEventListener("click",()=>{
+  navigator.clipboard.writeText(document.getElementById("email-body").value)
+    .then(()=>toast("Email body copied!")).catch(()=>toast("Please copy manually"));
+});
+document.getElementById("open-mail-btn").addEventListener("click",()=>{
+  const to=encodeURIComponent(document.getElementById("meta-to").value||"");
+  const cc=encodeURIComponent(document.getElementById("meta-cc").value||"");
+  const sub=encodeURIComponent(document.getElementById("meta-subject").value||"");
+  const body=encodeURIComponent(document.getElementById("email-body").value||"");
+  window.location.href=`mailto:${to}?cc=${cc}&subject=${sub}&body=${body}`;
+});
+document.getElementById("copy-subject-btn").addEventListener("click",()=>{
+  navigator.clipboard.writeText(document.getElementById("meta-subject").value)
+    .then(()=>toast("Subject copied!")).catch(()=>{});
+});
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+renderDrafts();
+fetchData(); // pull live data on open
+</script>
+</body>
+</html>
