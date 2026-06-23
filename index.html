@@ -674,6 +674,7 @@ function renderReport(){
     </div>
     <div class="report-btns">
       <button class="btn-copy" id="rpt-copy-btn">📋 Copy</button>
+      <button class="btn-copy" id="rpt-export-btn" style="background:#0F3D2A;color:#4ADE80;border-color:#0F3D2A">&#128203; Export for email</button>
       ${isPurna?`<button class="btn-download" id="rpt-dl-btn">⬇ Download</button>`:""}
     </div>
   </div>
@@ -705,6 +706,24 @@ function renderReport(){
   el.innerHTML=html;
   el.querySelector("#rpt-copy-btn").addEventListener("click",function(){
     navigator.clipboard.writeText(generateReportText()).then(()=>{this.textContent="✓ Copied!";this.style.background="#EDFBF3";this.style.color="#0F6E56";this.style.fontWeight="700";setTimeout(()=>{this.textContent="📋 Copy";this.style.background="";this.style.color="";this.style.fontWeight="";},2000);}).catch(()=>{});
+  });
+
+  // Export snapshot for local email composer
+  el.querySelector("#rpt-export-btn").addEventListener("click",function(){
+    var snap={
+      done:tasks.filter(function(t){return t.status==="Completed";}).length,
+      total:tasks.length,
+      blocked:tasks.filter(function(t){return t.status==="Blocked";}).length,
+      inprog:tasks.filter(function(t){return t.status==="In progress";}).length,
+      exported:new Date().toISOString(),
+      tasks:tasks.map(function(t){return {id:t.id,day:t.day,owner:t.owner,task:t.task,status:t.status,note:t.note};})
+    };
+    var btn=this;
+    navigator.clipboard.writeText(JSON.stringify(snap)).then(function(){
+      btn.textContent="✓ Copied! Paste in email composer";
+      btn.style.background="#0F6E56";
+      setTimeout(function(){btn.textContent="📋 Export for email";btn.style.background="#0F3D2A";},3000);
+    }).catch(function(){});
   });
   if(isPurna){
     el.querySelector("#rpt-dl-btn").addEventListener("click",()=>{
