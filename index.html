@@ -96,6 +96,7 @@ input:focus,select:focus{outline:2px solid #185FA5;outline-offset:1px}
 .report-btns{display:flex;gap:6px;align-items:center}
 .btn-copy{font-size:11px;padding:6px 12px;border:1px solid #D3D1C7;border-radius:7px;background:#fff;color:#555}
 .btn-download{font-size:11px;padding:6px 12px;border:1px solid #185FA5;border-radius:7px;background:#0C2554;color:#fff;font-weight:700}
+.btn-xl{font-size:11px;padding:6px 12px;border:1px solid #0F6E56;border-radius:7px;background:#0F6E56;color:#fff;font-weight:700}
 .person-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #F0F0F0}
 .mini-bar{height:4px;background:#E8EDF5;border-radius:3px;overflow:hidden;margin-top:3px}
 .mini-fill{height:100%;border-radius:3px}
@@ -170,10 +171,10 @@ input:focus,select:focus{outline:2px solid #185FA5;outline-offset:1px}
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwZXB_mHabS00ayVvYzo6A2x91des8h1lDRY54jiTO2rsB2EWk3QlaGF08VQC9FPnSA/exec";
 
-
 // ─── USERS ────────────────────────────────────────────────────────────────────
 const USERS = {
-  "purna.b@validusfintech.com":           {name:"Purna",    role:"coordinator"},
+  "pcrbayaneni@gmail.com":          {name:"Purna",    role:"admin"},
+  "purna.b@validusfintech.com":      {name:"Purna",    role:"coordinator"},
   "v-mukesh.shah@validusfintech.com":     {name:"Mukesh",   role:"member"},
   "krishna.kanneti@validusfintech.com":   {name:"Krishna",  role:"member"},
   "maqsood.pasha@validusfintech.com":     {name:"Maqsood",  role:"member"},
@@ -208,10 +209,10 @@ const RAW_DAYS = [
     {owner:"Purna",task:"Set up the tracker. Confirm the feed generator runs for MFU, NSE and BSE. Make one sample of each and check the format."},
     {owner:"Mukesh",task:"Start building the sandbox environment. Bring up the servers and point to a clean non-prod database."},
     {owner:"Krishna",task:"Work with Mukesh. Deploy the latest back-office build, set up the database, take a backup point."},
-    {owner:"Maqsood",task:"Write down the exact cycle we want to show, step by step. One page."},
+    {owner:"Maqsood",task:"Write down the exact cycle we want to show, step by step (feeds in, maker / checker, credit mapping, recon, endorsement, batch close, UCR, registers). One page."},
     {owner:"Manmohan",task:"Start the scheme master list. Decide schemes, plans, options and the business rules. Share a draft by end of day."},
     {owner:"Nimma",task:"Look at the back-office tables and the existing synthetic data. List which tables we need to seed for investors and folios."},
-    {owner:"Praneeth",task:"List every login we will need and the access each one needs."},
+    {owner:"Praneeth",task:"List every login we will need (Validus maker, checker, front-office branch, ops, client view) and the access each one needs."},
     {owner:"Soumya",task:"Start a simple checklist of what good looks like at each step. Nivedita and Ruchita: read the plan and be ready."},
   ]},
   {day:"Day 2",date:"Thu 18 Jun",phase:"Environment ready, masters locked",tasks:[
@@ -233,39 +234,39 @@ const RAW_DAYS = [
     {owner:"Soumya",task:"Check the schemes and folios are there and look right."},
   ]},
   {day:"Day 4",date:"Mon 22 Jun",phase:"First full end-to-end run (entry to UCR)",tasks:[
-    {owner:"Nimma",task:"Top up investors and folios for a good spread (single, joint, minor, NRI, HUF, corporate)."},
-    {owner:"Manmohan",task:"Register the SIPs. Set up demo SIPs with first installment dated 7 July."},
-    {owner:"Purna",task:"Drop the day's feed files (MFU, NSE, BSE) and prepare the synthetic bank credit file for recon."},
-    {owner:"Manmohan",task:"Capture the day's physical onboarding and transactions as maker."},
-    {owner:"Maqsood",task:"Run the full cycle end to end. Note exactly where it stops."},
+    {owner:"Nimma",task:"First thing, top up investors and folios for a good spread (single, joint, minor, NRI, HUF, corporate) so the cycle has enough volume. Quick gap report."},
+    {owner:"Manmohan",task:"Register the SIPs we will use for the daily cycle rehearsals. Separately, set up the demo SIPs with their first installment dated for 7 July, so they get picked up live on demo day and not used up in the daily runs."},
+    {owner:"Purna",task:"Drop the day's feed files (MFU, NSE, BSE), and prepare the synthetic bank credit file for the recon step with Nimma."},
+    {owner:"Manmohan",task:"Capture the day's physical onboarding and transactions as maker. Maqsood and Soumya check and QC."},
+    {owner:"Maqsood",task:"Run the full cycle end to end - validation, credit mapping, banking reconciliation, endorsement, batch close and UCR. First full run, so expect it to break somewhere. Note exactly where it stops."},
     {owner:"Nimma",task:"Generate the registers and a short daily summary."},
-    {owner:"Soumya",task:"QC each step and write down what broke."},
+    {owner:"Soumya",task:"QC each step and write down what broke. Mukesh, Nivedita and Ruchita fix issues as they come up, same day where possible."},
   ]},
-  {day:"Day 5",date:"Tue 23 Jun",phase:"End-to-end run — clear yesterday's breaks",tasks:[
-    {owner:"Mukesh / Nivedita / Ruchita",task:"First thing, clear the issues logged on Day 4. Maqsood re-tests."},
+  {day:"Day 5",date:"Tue 23 Jun",phase:"End-to-end run - clear yesterday's breaks",tasks:[
+    {owner:"Mukesh / Nivedita / Ruchita",task:"First thing, clear the issues logged on Day 4. Maqsood re-tests the steps that broke."},
     {owner:"Purna",task:"Drop the day's feed files."},
-    {owner:"Manmohan",task:"Physical onboarding and transactions as maker."},
-    {owner:"Maqsood",task:"Run the full cycle again, entry to UCR."},
+    {owner:"Manmohan",task:"Physical onboarding and transactions as maker. Maqsood / Soumya check and QC."},
+    {owner:"Maqsood",task:"Run the full cycle again, entry to UCR. It should get further than yesterday."},
     {owner:"Nimma",task:"Registers and the recon input file."},
     {owner:"Soumya",task:"QC. Confirm yesterday's breaks are actually fixed."},
   ]},
-  {day:"Day 6",date:"Wed 24 Jun",phase:"End-to-end run — add redemptions and switches",tasks:[
+  {day:"Day 6",date:"Wed 24 Jun",phase:"End-to-end run - add redemptions and switches",tasks:[
     {owner:"Purna",task:"Drop the day's feed files."},
-    {owner:"Maqsood",task:"Run the full cycle. Include redemptions and switches. Check exit load works."},
-    {owner:"Manmohan",task:"Rehearse a SIP installment falling due in today's cycle."},
+    {owner:"Maqsood",task:"Run the full cycle. Include some redemptions and switches so the registers show variety, and check the exit load works."},
+    {owner:"Manmohan",task:"Rehearse a SIP installment falling due in today's cycle and getting picked up (use the rehearsal SIPs, not the demo ones)."},
     {owner:"Nimma",task:"Registers, including the SIP register."},
     {owner:"Soumya",task:"QC. Devs fix any issues same day."},
   ]},
-  {day:"Day 7",date:"Thu 25 Jun",phase:"End-to-end run — put in exceptions on purpose",tasks:[
+  {day:"Day 7",date:"Thu 25 Jun",phase:"End-to-end run - put in exceptions on purpose",tasks:[
     {owner:"Purna",task:"Drop the day's feed files."},
-    {owner:"Maqsood / Soumya",task:"Put in exception cases — rejected feed record, short credit, NIGO application."},
+    {owner:"Maqsood / Soumya",task:"Put in exception cases on purpose - a rejected feed record, a short credit, a NIGO physical application - and confirm the system handles them and they show in the right registers."},
     {owner:"Maqsood",task:"Run the full cycle, entry to UCR."},
     {owner:"Manmohan",task:"Confirm the maker / checker rejections behave correctly."},
-    {owner:"Nimma",task:"Exception and rejection registers."},
+    {owner:"Nimma",task:"Exception and rejection registers. Devs fix any issues."},
   ]},
   {day:"Day 8",date:"Fri 26 Jun",phase:"Clean end-to-end run and lock the routine",tasks:[
     {owner:"Purna",task:"Drop the day's feed files."},
-    {owner:"Maqsood",task:"Run the full cycle clean, entry to UCR, no manual workarounds."},
+    {owner:"Maqsood",task:"Run the full cycle. It should now run clean, entry to UCR, with no manual workarounds."},
     {owner:"Manmohan",task:"Shadow Maqsood on batch close and UCR, and run part of it himself."},
     {owner:"Nimma",task:"Take a full set of registers as reference."},
     {owner:"Soumya",task:"QC sign-off for the week."},
@@ -273,13 +274,13 @@ const RAW_DAYS = [
   ]},
   {day:"Day 9",date:"Mon 29 Jun",phase:"Daily cycle + first demo-flow rehearsal",tasks:[
     {owner:"Purna",task:"Drop the day's feed files."},
-    {owner:"Maqsood / Manmohan",task:"Run the full cycle, then walk through the exact demo sequence once in order."},
+    {owner:"Maqsood / Manmohan",task:"Run the full cycle, then walk through the exact demo sequence once, in order, the way we will show the client."},
     {owner:"Nimma",task:"Registers and daily summary."},
     {owner:"Soumya",task:"QC. Praneeth notes anything awkward in the demo flow."},
   ]},
   {day:"Day 10",date:"Tue 30 Jun",phase:"Daily cycle + confirm the SIP pickup",tasks:[
     {owner:"Purna",task:"Drop the day's feed files."},
-    {owner:"Manmohan",task:"Make sure a SIP installment falls due today. Confirm demo SIPs still pending for 7 July."},
+    {owner:"Manmohan",task:"Make sure a SIP installment falls due in today's cycle and gets picked up, so we know the workflow is solid. Confirm the demo SIPs are still pending for 7 July."},
     {owner:"Maqsood",task:"Run the full cycle."},
     {owner:"Nimma",task:"Registers."},
     {owner:"Soumya",task:"QC."},
@@ -287,19 +288,19 @@ const RAW_DAYS = [
   {day:"Day 11",date:"Wed 1 Jul",phase:"Daily cycle + lock the reference outputs",tasks:[
     {owner:"Purna",task:"Drop the day's feed files."},
     {owner:"Maqsood",task:"Run the full cycle."},
-    {owner:"Nimma",task:"Take a full reference set of registers and reports."},
+    {owner:"Nimma",task:"Take a full reference set of registers and reports - this is what good looks like."},
     {owner:"Purna",task:"Note the exact folios, investors and SIPs we will use in the live demo."},
     {owner:"Soumya",task:"QC."},
   ]},
   {day:"Day 12",date:"Thu 2 Jul",phase:"Daily cycle + get ready to freeze",tasks:[
     {owner:"Purna",task:"Drop the day's feed files."},
     {owner:"Maqsood",task:"Run a clean cycle. Confirm nothing is left pending in the queues."},
-    {owner:"Maqsood / Manmohan",task:"Re-confirm the demo SIPs are dated for the 7th."},
+    {owner:"Maqsood / Manmohan",task:"Re-confirm the demo SIPs are dated for the 7th and will be picked up."},
     {owner:"Nimma",task:"Final reference registers."},
     {owner:"Mukesh / Krishna",task:"Get ready to freeze the environment after the dry run."},
   ]},
   {day:"Day 13",date:"Fri 3 Jul",phase:"Full dry run (dress rehearsal)",tasks:[
-    {owner:"Maqsood / Manmohan",task:"Run the whole thing as if the client is watching, following the demo script."},
+    {owner:"Maqsood / Manmohan",task:"Run the whole thing as if the client is watching, following the demo script. Present the steps."},
     {owner:"Praneeth",task:"Coordinate the dry run, keep time, note the rough spots."},
     {owner:"Soumya",task:"Watch for anything off and log it."},
     {owner:"Nivedita / Ruchita",task:"On standby for any last fix."},
@@ -307,11 +308,11 @@ const RAW_DAYS = [
   ]},
   {day:"Day 14",date:"Mon 6 Jul",phase:"Final fixes, freeze, client access",tasks:[
     {owner:"Nivedita / Ruchita / Mukesh",task:"Clear anything left from the dry run."},
-    {owner:"Mukesh / Krishna",task:"Freeze the environment. Take a backup."},
-    {owner:"Praneeth",task:"Set up the client's view-only login and test it."},
-    {owner:"Maqsood",task:"Reset the demo data to a clean starting point, but keep the pending SIPs."},
-    {owner:"Nimma",task:"Final check that all registers and reports generate cleanly. Soumya: final QC pass."},
-    {owner:"Purna",task:"Prepare the handover note — URL, logins, what to click. Update the tracker."},
+    {owner:"Mukesh / Krishna",task:"Freeze the environment. Take a backup. Make sure nothing else changes after this."},
+    {owner:"Praneeth",task:"Set up the client's view-only login and test it. Confirm the client sees only what they should."},
+    {owner:"Maqsood",task:"Reset the demo data to a clean starting point so the live cycle is fresh, but keep the pending SIPs."},
+    {owner:"Nimma",task:"Final check that all registers and reports generate cleanly. Soumya: final QC pass and sign off."},
+    {owner:"Purna",task:"Prepare the handover note - URL, logins, what to click. Update the tracker."},
   ]},
   {day:"Day 15",date:"Tue 7 Jul",phase:"Handover to the client",tasks:[
     {owner:"Mukesh / Maqsood",task:"Morning smoke test. Log in, run a quick check, confirm everything is up."},
@@ -338,6 +339,7 @@ let openDays     = new Set();
 let openTasks    = new Set();
 let noteTimers   = {};
 const LS_KEY     = "validus_tracker_v2";
+const WR_KEY     = "validus_weekly_reports_v1";
 
 // ─── LOCAL STORAGE ────────────────────────────────────────────────────────────
 function saveLocal(){
@@ -353,6 +355,97 @@ function loadLocal(){
   }catch(e){return false;}
 }
 
+// ─── WEEKLY EXCEL HELPERS ─────────────────────────────────────────────────────
+function isFriday(){ return new Date().getDay()===5; }
+function getFridayLabel(){
+  var now=new Date(), d=now.getDate();
+  var sfx=(d===1||d===21||d===31)?"st":(d===2||d===22)?"nd":(d===3||d===23)?"rd":"th";
+  var mon=now.toLocaleDateString("en-GB",{month:"long"});
+  return d+sfx+" "+mon;
+}
+function getWeeklyData(){
+  try{return JSON.parse(localStorage.getItem(WR_KEY)||"{}");}catch(e){return {};}
+}
+
+function fmtDate(d){
+  // "Wed 17 Jun" → "Wed, 17 June"
+  var mon={"Jan":"January","Feb":"February","Mar":"March","Apr":"April","May":"May","Jun":"June",
+           "Jul":"July","Aug":"August","Sep":"September","Oct":"October","Nov":"November","Dec":"December"};
+  return d.replace(/^(\w+) (\d+) (\w+)$/,function(_,day,num,m){ return day+", "+num+" "+(mon[m]||m); });
+}
+function statusColor(s){
+  if(s==="Completed")   return{bg:"#EDFBF3",c:"#0F6E56"};
+  if(s==="In progress") return{bg:"#FFFBEC",c:"#854F0B"};
+  if(s==="Blocked")     return{bg:"#FFF0F0",c:"#A32D2D"};
+  return{bg:"#F6F6F6",c:"#888"};
+}
+
+function generatePDF(){
+  var weeklyData=getWeeklyData();
+  if(isFriday()){
+    var colName="Update as on "+getFridayLabel()+" Friday";
+    if(!weeklyData[colName]){ weeklyData[colName]={}; localStorage.setItem(WR_KEY,JSON.stringify(weeklyData)); }
+  }
+  var fridayCols=Object.keys(weeklyData);
+  var dateStr=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+
+  var thStyle='style="background:#0C2554;color:#fff;padding:9px 8px;font-size:12px;font-weight:700;text-align:left;white-space:nowrap;border:1px solid #0a1e44"';
+  var thead='<tr><th '+thStyle+'>Day</th><th '+thStyle+'>Date</th><th '+thStyle+' style="background:#0C2554;color:#fff;padding:9px 8px;font-size:12px;font-weight:700;text-align:left;min-width:140px;border:1px solid #0a1e44">Overall task for the day</th><th '+thStyle+'>Owner</th><th '+thStyle+' style="background:#0C2554;color:#fff;padding:9px 8px;font-size:12px;font-weight:700;text-align:left;min-width:220px;border:1px solid #0a1e44">Task for the day</th><th '+thStyle+'>Status</th><th '+thStyle+' style="background:#0C2554;color:#fff;padding:9px 8px;font-size:12px;font-weight:700;text-align:left;min-width:120px;border:1px solid #0a1e44">Notes</th>';
+  fridayCols.forEach(function(col){
+    thead+='<th '+thStyle+' style="background:#0C2554;color:#fff;padding:9px 8px;font-size:12px;font-weight:700;text-align:left;min-width:130px;border:1px solid #0a1e44">'+col+'</th>';
+  });
+  thead='<thead><tr>'+thead+'</tr></thead>';
+
+  var tbody='<tbody>';
+  RAW_DAYS.forEach(function(raw){
+    raw.tasks.forEach(function(rt,i){
+      var id=raw.day+"-"+i;
+      var t=tasks.find(function(x){return x.id===id;});
+      var status=t?t.status:"Not started";
+      var note=t?t.note:"";
+      var sc=statusColor(status);
+      var baseCell='padding:8px 8px;font-size:12px;border:1px solid #E0E6F0;vertical-align:top;line-height:1.5;';
+      var dayNum=raw.day.replace("Day ","");
+      tbody+='<tr style="background:'+(i%2===0?"#fff":"#F9FBFD")+'">';
+      tbody+='<td style="'+baseCell+'font-weight:700;color:#0C2554;text-align:center">'+(i===0?dayNum:"")+'</td>';
+      tbody+='<td style="'+baseCell+'white-space:nowrap;color:#555">'+(i===0?fmtDate(raw.date):"")+'</td>';
+      tbody+='<td style="'+baseCell+'color:#333;font-style:'+(i===0?"normal":"italic")+'">'+(i===0?raw.phase:"")+'</td>';
+      tbody+='<td style="'+baseCell+'font-weight:600;color:#1a1a1a">'+rt.owner+'</td>';
+      tbody+='<td style="'+baseCell+'color:#333;line-height:1.5">'+rt.task+'</td>';
+      tbody+='<td style="'+baseCell+'"><span style="background:'+sc.bg+';color:'+sc.c+';padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap">'+status+'</span></td>';
+      tbody+='<td style="'+baseCell+'color:#666;font-style:italic">'+note+'</td>';
+      fridayCols.forEach(function(col){
+        tbody+='<td style="'+baseCell+'color:#333">'+(weeklyData[col][id]||"")+'</td>';
+      });
+      tbody+='</tr>';
+    });
+  });
+  tbody+='</tbody>';
+
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Validus Sandbox Status Report</title>'
+    +'<style>@page{size:A4 portrait;margin:12mm}body{font-family:Arial,sans-serif;font-size:12px;margin:0}'
+    +'.header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;border-bottom:3px solid #0C2554;padding-bottom:10px}'
+    +'.header-left .sub{font-size:10px;font-weight:700;color:#7BA7D9;text-transform:uppercase;letter-spacing:0.12em}'
+    +'.header-left .title{font-size:18px;font-weight:800;color:#0C2554;margin-top:2px}'
+    +'.header-right{font-size:10px;color:#888;text-align:right}'
+    +'table{width:100%;border-collapse:collapse;word-break:break-word}'
+    +'@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'
+    +'</style></head><body>'
+    +'<div class="header"><div class="header-left"><div class="sub">Validus Fintech Services · MF RTA Sandbox Setup</div>'
+    +'<div class="title">Project Status Report</div></div>'
+    +'<div class="header-right">Generated: '+dateStr+'<br/>Handover: Tue 7 Jul 2025<br/>Total tasks: '+tasks.length+'</div></div>'
+    +'<table>'+thead+tbody+'</table></body></html>';
+
+  var win=window.open("","_blank");
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(function(){win.print();},600);
+}
+
+// ─── ENVIRONMENT ─────────────────────────────────────────────────────────────
+const IS_LOCAL = window.location.protocol === "file:";
+
 // ─── SYNC STATUS ──────────────────────────────────────────────────────────────
 function setSync(s){
   const el=document.getElementById("sync-status");if(!el)return;
@@ -367,11 +460,29 @@ function setSync(s){
 }
 
 // ─── GOOGLE APPS SCRIPT API ───────────────────────────────────────────────────
+
+// JSONP read — used when running from file:// (fetch is blocked locally)
+function gasReadJSONP(){
+  return new Promise(function(resolve){
+    var cb="_gasCB"+Date.now();
+    var script=document.createElement("script");
+    window[cb]=function(data){ delete window[cb]; document.head.removeChild(script); resolve(data); };
+    script.onerror=function(){ delete window[cb]; document.head.removeChild(script); resolve(null); };
+    script.src=GAS_URL+"?callback="+cb;
+    document.head.appendChild(script);
+  });
+}
+
 async function gasRead(){
   try{
-    const res=await fetch(GAS_URL,{method:"GET"});
-    if(!res.ok) throw new Error(res.status);
-    const rows=await res.json();
+    var rows;
+    if(IS_LOCAL){
+      rows=await gasReadJSONP();
+    }else{
+      const res=await fetch(GAS_URL,{method:"GET"});
+      if(!res.ok) throw new Error(res.status);
+      rows=await res.json();
+    }
     if(!Array.isArray(rows)||rows.length===0) return false;
     const map={};
     rows.forEach(r=>{if(r.id) map[r.id]={status:r.status||"Not started",note:r.note||""};});
@@ -386,15 +497,23 @@ async function gasRead(){
   }
 }
 
-async function gasInit(){
-  try{
-    const res=await fetch(GAS_URL,{
-      method:"POST",
-      headers:{"Content-Type":"text/plain"},
-      body:JSON.stringify({action:"init",tasks:tasks.map(t=>({id:t.id,day:t.day,date:t.date,owner:t.owner,status:t.status,note:t.note}))})
-    });
+async function gasPost(body){
+  if(IS_LOCAL){
+    // no-cors: text/plain is a simple content-type, request goes through without preflight
+    fetch(GAS_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:body});
+    setSync("ok"); // optimistic — we can't read the response in no-cors
+    return true;
+  }else{
+    const res=await fetch(GAS_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:body});
     if(!res.ok) throw new Error(res.status);
     setSync("ok");
+    return true;
+  }
+}
+
+async function gasInit(){
+  try{
+    await gasPost(JSON.stringify({action:"init",tasks:tasks.map(t=>({id:t.id,day:t.day,date:t.date,owner:t.owner,status:t.status,note:t.note}))}));
     return true;
   }catch(e){
     console.warn("GAS init:",e.message);
@@ -406,13 +525,7 @@ async function gasInit(){
 async function gasUpdate(task){
   setSync("saving");
   try{
-    const res=await fetch(GAS_URL,{
-      method:"POST",
-      headers:{"Content-Type":"text/plain"},
-      body:JSON.stringify({action:"update",id:task.id,status:task.status,note:task.note})
-    });
-    if(!res.ok) throw new Error(res.status);
-    setSync("ok");
+    await gasPost(JSON.stringify({action:"update",id:task.id,status:task.status,note:task.note}));
     return true;
   }catch(e){
     console.warn("GAS update:",e.message);
@@ -538,7 +651,8 @@ function renderTracker(){
       <div class="acc-day-body${isOpen?" open":""}">`;
     if(!filtered.length){html+=`<div class="empty-msg">No tasks match the filter.</div>`;}
     filtered.forEach(t=>{
-      const mine=currentUser&&matchesUser(t.owner,currentUser.name);
+      const isAdmin=currentUser&&currentUser.role==="admin";
+      const mine=isAdmin||( currentUser&&matchesUser(t.owner,currentUser.name));
       const isTaskOpen=openTasks.has(t.id);
       html+=`<div class="acc-task${mine?" mine":""}">
         <div class="acc-task-header" data-task-toggle="${esc(t.id)}">
@@ -673,9 +787,8 @@ function renderReport(){
       <div style="font-size:11px;color:#888;margin-top:2px">To: Ganesh Venkatachalam (CEO) · CTO · ${esc(today)}</div>
     </div>
     <div class="report-btns">
-      <button class="btn-copy" id="rpt-copy-btn">📋 Copy</button>
-      <button class="btn-copy" id="rpt-export-btn" style="background:#0F3D2A;color:#4ADE80;border-color:#0F3D2A">&#128203; Export for email</button>
-      ${isPurna?`<button class="btn-download" id="rpt-dl-btn">⬇ Download</button>`:""}
+      <button class="btn-copy" id="rpt-copy-btn">📋 Copy report</button>
+      <button class="btn-xl" id="rpt-xl-btn">📄 Download PDF</button>
     </div>
   </div>
   <div class="metrics">
@@ -705,42 +818,17 @@ function renderReport(){
   const el=document.getElementById("tab-report");
   el.innerHTML=html;
   el.querySelector("#rpt-copy-btn").addEventListener("click",function(){
-    navigator.clipboard.writeText(generateReportText()).then(()=>{this.textContent="✓ Copied!";this.style.background="#EDFBF3";this.style.color="#0F6E56";this.style.fontWeight="700";setTimeout(()=>{this.textContent="📋 Copy";this.style.background="";this.style.color="";this.style.fontWeight="";},2000);}).catch(()=>{});
+    navigator.clipboard.writeText(generateReportText()).then(()=>{this.textContent="✓ Copied!";this.style.background="#EDFBF3";this.style.color="#0F6E56";this.style.fontWeight="700";setTimeout(()=>{this.textContent="📋 Copy report";this.style.background="";this.style.color="";this.style.fontWeight="";},2000);}).catch(()=>{});
   });
-
-  // Export snapshot for local email composer
-  el.querySelector("#rpt-export-btn").addEventListener("click",function(){
-    var snap={
-      done:tasks.filter(function(t){return t.status==="Completed";}).length,
-      total:tasks.length,
-      blocked:tasks.filter(function(t){return t.status==="Blocked";}).length,
-      inprog:tasks.filter(function(t){return t.status==="In progress";}).length,
-      exported:new Date().toISOString(),
-      tasks:tasks.map(function(t){return {id:t.id,day:t.day,owner:t.owner,task:t.task,status:t.status,note:t.note};})
-    };
-    var btn=this;
-    navigator.clipboard.writeText(JSON.stringify(snap)).then(function(){
-      btn.textContent="✓ Copied! Paste in email composer";
-      btn.style.background="#0F6E56";
-      setTimeout(function(){btn.textContent="📋 Export for email";btn.style.background="#0F3D2A";},3000);
-    }).catch(function(){});
-  });
-  if(isPurna){
-    el.querySelector("#rpt-dl-btn").addEventListener("click",()=>{
-      const blob=new Blob([generateReportText()],{type:"text/plain;charset=utf-8"});
-      const url=URL.createObjectURL(blob);const a=document.createElement("a");
-      a.href=url;a.download=`Validus_EOD_Report_${new Date().toISOString().slice(0,10)}.txt`;
-      document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-    });
-  }
+  el.querySelector("#rpt-xl-btn").addEventListener("click",()=>generatePDF());
 }
 
 // ─── RENDER: MILESTONES ───────────────────────────────────────────────────────
 function renderMilestones(){
   const ms=[
     {by:"Fri 19 Jun",day:"Day 3",label:"M1 — Environment & base data ready",desc:"Environment up, schemes in, investors seeded, logins ready, feed files generated."},
-    {by:"Fri 26 Jun",day:"Day 8",label:"M2 — Daily cycle running clean",desc:"End-to-end cycle running clean entry to UCR. Exceptions covered. Demo SIPs set for 7 Jul."},
-    {by:"Fri 3 Jul",day:"Day 13",label:"M3 — Dry run complete",desc:"Cycles stable, demo flow rehearsed, reference outputs locked, dress rehearsal done."},
+    {by:"Fri 26 Jun",day:"Day 8",label:"M2 — Daily cycle running clean",desc:"End-to-end cycle running clean entry to UCR. Variety and exceptions covered. Demo SIPs set for 7 Jul."},
+    {by:"Fri 3 Jul",day:"Day 13",label:"M3 — Dry run complete",desc:"Cycles stable, demo flow rehearsed, reference outputs locked, one full dry run done."},
     {by:"Tue 7 Jul",day:"Day 15",label:"M4 — Client handover",desc:"Sandbox handed over to the client. All access and documentation provided."},
   ];
   let html=`<div style="font-size:12px;color:#555;margin-bottom:16px;line-height:1.6">Four milestone gates across the 15-day plan.</div>`;
@@ -786,7 +874,6 @@ async function doLogin(){
   currentUser={email,...user};
   alertOwner=user.name;
 
-  // Show app immediately with local data
   loadLocal();
   document.getElementById("login-screen").style.display="none";
   document.getElementById("app-screen").style.display="block";
@@ -794,15 +881,19 @@ async function doLogin(){
   const col=ownerColor(user.name);
   av.textContent=initials(user.name);av.style.background=col.bg;av.style.color=col.c;av.style.border=`1.5px solid ${col.c}22`;
   document.getElementById("topbar-name").textContent=user.name;
+  if(user.role==="admin"){
+    const badge=document.createElement("span");
+    badge.textContent="ADMIN";
+    badge.style.cssText="font-size:9px;font-weight:800;background:#FAC775;color:#854F0B;padding:2px 7px;border-radius:10px;letter-spacing:0.06em";
+    const signout=document.getElementById("signout-btn");
+    signout.parentNode.insertBefore(badge,signout);
+  }
 
-  // Open today's day accordion
   const todayRaw=new Date().toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
   const todayDay=RAW_DAYS.find(d=>d.date.toLowerCase()===todayRaw.toLowerCase());
   openDays.add(todayDay?todayDay.day:RAW_DAYS[0].day);
 
   switchTab("tracker");
-
-  // Sync with SheetDB in background
   initSync().then(()=>{renderTracker();renderReport();});
   startAutoRefresh();
 }
