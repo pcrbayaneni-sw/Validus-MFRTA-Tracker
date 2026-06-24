@@ -826,26 +826,32 @@ function renderReport(){
 // ─── RENDER: MILESTONES ───────────────────────────────────────────────────────
 function renderMilestones(){
   const ms=[
-    {by:"Fri 19 Jun",day:"Day 3",label:"M1 — Environment & base data ready",desc:"Environment up, schemes in, investors seeded, logins ready, feed files generated."},
-    {by:"Fri 26 Jun",day:"Day 8",label:"M2 — Daily cycle running clean",desc:"End-to-end cycle running clean entry to UCR. Variety and exceptions covered. Demo SIPs set for 7 Jul."},
-    {by:"Fri 3 Jul",day:"Day 13",label:"M3 — Dry run complete",desc:"Cycles stable, demo flow rehearsed, reference outputs locked, one full dry run done."},
-    {by:"Tue 7 Jul",day:"Day 15",label:"M4 — Client handover",desc:"Sandbox handed over to the client. All access and documentation provided."},
+    {by:"Fri 19 Jun",fromDay:"Day 1",toDay:"Day 3", label:"M1 — Environment & base data ready",desc:"Environment up, schemes in, investors seeded, logins ready, feed files generated."},
+    {by:"Fri 26 Jun",fromDay:"Day 4",toDay:"Day 8", label:"M2 — Daily cycle running clean",desc:"End-to-end cycle running clean entry to UCR. Variety and exceptions covered. Demo SIPs set for 7 Jul."},
+    {by:"Fri 3 Jul", fromDay:"Day 9",toDay:"Day 13",label:"M3 — Dry run complete",desc:"Cycles stable, demo flow rehearsed, reference outputs locked, one full dry run done."},
+    {by:"Tue 7 Jul", fromDay:"Day 14",toDay:"Day 15",label:"M4 — Client handover",desc:"Sandbox handed over to the client. All access and documentation provided."},
   ];
   let html=`<div style="font-size:12px;color:#555;margin-bottom:16px;line-height:1.6">Four milestone gates across the 15-day plan.</div>`;
   ms.forEach(m=>{
-    const idx=RAW_DAYS.findIndex(d=>d.day===m.day);
-    const ids=RAW_DAYS.slice(0,idx+1).flatMap((d,di)=>d.tasks.map((_,ti)=>`${d.day}-${ti}`));
+    const fromIdx=RAW_DAYS.findIndex(d=>d.day===m.fromDay);
+    const toIdx=RAW_DAYS.findIndex(d=>d.day===m.toDay);
+    const ids=RAW_DAYS.slice(fromIdx,toIdx+1).flatMap((d)=>d.tasks.map((_,ti)=>`${d.day}-${ti}`));
     const rel=tasks.filter(t=>ids.includes(t.id));
     const dn=rel.filter(t=>t.status==="Completed").length;
+    const ip=rel.filter(t=>t.status==="In progress").length;
+    const bl=rel.filter(t=>t.status==="Blocked").length;
     const p=rel.length>0?Math.round((dn/rel.length)*100):0;
     const c=p===100?"#0F6E56":p>0?"#854F0B":"#888";
     html+=`<div class="milestone-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">
         <div><div style="font-size:13px;font-weight:700;color:#0C2554;margin-bottom:2px">${esc(m.label)}</div>
-        <div style="font-size:11px;color:#888">Target: ${esc(m.by)}</div></div>
+        <div style="font-size:11px;color:#888">Target: ${esc(m.by)} · ${esc(m.fromDay)} – ${esc(m.toDay)}</div></div>
         <div style="font-size:18px;font-weight:800;color:${c}">${p}%</div>
       </div>
-      <div style="font-size:11px;color:#555;margin-bottom:8px;line-height:1.5">${esc(m.desc)}</div>
+      <div style="font-size:11px;color:#555;margin-bottom:6px;line-height:1.5">${esc(m.desc)}</div>
+      <div style="font-size:11px;color:#888;margin-bottom:6px">
+        ✓ ${dn} done &nbsp;◑ ${ip} in progress &nbsp;${bl>0?`<span style="color:#A32D2D">✕ ${bl} blocked</span>`:`✕ 0 blocked`} &nbsp;/ ${rel.length} total
+      </div>
       <div class="progress-bar" style="margin-bottom:0"><div class="progress-fill" style="width:${p}%;background:${p===100?"#0F6E56":"#185FA5"}"></div></div>
     </div>`;
   });
@@ -894,7 +900,7 @@ async function doLogin(){
   openDays.add(todayDay?todayDay.day:RAW_DAYS[0].day);
 
   switchTab("tracker");
-  initSync().then(()=>{renderTracker();renderReport();});
+  initSync().then(()=>{renderTracker();renderReport();renderMilestones();});
   startAutoRefresh();
 }
 
